@@ -1,3 +1,5 @@
+'use client';
+
 export default function TeacherCTA() {
   return (
     <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600">

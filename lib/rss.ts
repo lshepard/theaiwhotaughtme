@@ -1,9 +1,12 @@
 import { XMLParser } from 'fast-xml-parser';
 import { Episode } from '@/types/episode';
 
+const PODBEAN_RSS_URL = 'https://www.theaiwhotaughtme.com/feed.xml';
+
+// Use our proxy in production, direct Podbean URL at build time
 const RSS_FEED_URL = process.env.NEXT_PUBLIC_SITE_URL
   ? `${process.env.NEXT_PUBLIC_SITE_URL}/feed.xml`
-  : 'http://localhost:3000/feed.xml';
+  : PODBEAN_RSS_URL;
 
 export async function fetchEpisodes(): Promise<Episode[]> {
   try {

@@ -1,8 +1,13 @@
+import Hero from '@/components/Hero';
+import TeacherCTA from '@/components/TeacherCTA';
+import PodcastEpisodes from '@/components/PodcastEpisodes';
+
 export default function Home() {
   return (
-    <main className="min-h-screen p-8">
-      <h1 className="text-4xl font-bold">The AI Who Taught Me</h1>
-      <p className="mt-4 text-lg">Podcast website coming soon...</p>
+    <main className="min-h-screen">
+      <Hero />
+      <TeacherCTA />
+      <PodcastEpisodes />
     </main>
   );
 }
