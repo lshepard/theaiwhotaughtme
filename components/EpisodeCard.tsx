@@ -19,6 +19,33 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
     }
   };
 
+  // Format duration to readable format
+  const formatDuration = (duration: string) => {
+    if (!duration) return '';
+
+    // Convert to string if it's a number
+    const durationStr = String(duration);
+
+    // If it's already in HH:MM:SS or MM:SS format, return as is
+    if (durationStr.includes(':')) {
+      return durationStr;
+    }
+
+    // If it's in seconds (number only), convert to MM:SS or HH:MM:SS
+    const seconds = parseInt(durationStr, 10);
+    if (isNaN(seconds)) return durationStr;
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    } else {
+      return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+  };
+
   // Strip HTML tags from description for display
   const stripHtml = (html: string) => {
     return html.replace(/<[^>]*>/g, '');
@@ -48,7 +75,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
             </h3>
             <p className="text-sm text-teal-600 dark:text-cyan-400 mb-3">
               {formatDate(episode.pubDate)}
-              {episode.duration && ` • ${episode.duration}`}
+              {episode.duration && ` • ${formatDuration(episode.duration)}`}
             </p>
             <p className="text-gray-700 dark:text-gray-300 line-clamp-3 mb-4">
               {stripHtml(episode.description)}
