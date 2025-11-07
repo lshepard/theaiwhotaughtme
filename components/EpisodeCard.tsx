@@ -105,7 +105,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="text-teal-600 dark:text-cyan-400 text-sm font-semibold hover:underline"
                 >
-                  {isExpanded ? 'Read more' : 'Read less'}
+                  {isExpanded ? 'Less' : 'More'}
                 </button>
               )}
             </div>
