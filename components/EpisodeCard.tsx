@@ -1,11 +1,15 @@
+'use client';
+
 import { Episode } from '@/types/episode';
 import Image from 'next/image';
+import { useState } from 'react';
 
 interface EpisodeCardProps {
   episode: Episode;
 }
 
 export default function EpisodeCard({ episode }: EpisodeCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -77,9 +81,19 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
               {formatDate(episode.pubDate)}
               {episode.duration && ` • ${formatDuration(episode.duration)}`}
             </p>
-            <p className="text-gray-700 dark:text-gray-300 line-clamp-3 mb-4">
-              {stripHtml(episode.description)}
-            </p>
+            <div>
+              <p className={`text-gray-700 dark:text-gray-300 ${isExpanded ? '' : 'line-clamp-3'} mb-2`}>
+                {stripHtml(episode.description)}
+              </p>
+              {episode.description && stripHtml(episode.description).length > 150 && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-teal-600 dark:text-cyan-400 text-sm font-semibold hover:underline"
+                >
+                  {isExpanded ? 'Read less' : 'Read more'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
