@@ -23,18 +23,13 @@ export default function Hero() {
             The AI Who Taught Me
           </h1>
           <div className="text-lg md:text-xl text-cyan-50 space-y-4 drop-shadow-md">
-            <p className="font-semibold text-cyan-200">
-              Why This Podcast Exists:
+            <p className="font-semibold text-cyan-200 text-2xl md:text-3xl mb-2">
+              Can a robot really teach?
             </p>
             <p>
-              Artificial intelligence is transforming education in profound ways. But the most
-              important stories aren't about the technology itself—they're about the teachers
-              who are using it to make a real difference in their students' lives.
-            </p>
-            <p>
-              This podcast captures those stories. Real teachers, real classrooms, real impact.
-              Each episode explores how educators are thoughtfully integrating AI tools to
-              enhance learning, save time, and unlock new possibilities for their students.
+              <strong>The AI Who Taught Me</strong> is a weekly podcast that explores how artificial intelligence
+              is changing classrooms—sometimes for better, sometimes not. Hosted by Luke Shepard and his AI
+              co-host Emerald, each episode investigates the real-world impact of AI on how we learn.
             </p>
           </div>
 
