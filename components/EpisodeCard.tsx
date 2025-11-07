@@ -25,7 +25,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-white dark:bg-[#1a3a4a] rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:shadow-cyan-500/10 transition-all border border-transparent hover:border-cyan-500/20">
       <div className="p-6">
         <div className="flex gap-4">
           {/* Episode artwork */}
@@ -36,17 +36,17 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
                 alt={episode.title}
                 width={120}
                 height={120}
-                className="rounded-lg"
+                className="rounded-lg ring-2 ring-cyan-500/20"
               />
             </div>
           )}
 
           {/* Episode info */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+            <h3 className="text-xl font-semibold mb-2 text-[#1a4a5a] dark:text-cyan-100">
               {episode.title}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+            <p className="text-sm text-teal-600 dark:text-cyan-400 mb-3">
               {formatDate(episode.pubDate)}
               {episode.duration && ` • ${episode.duration}`}
             </p>
