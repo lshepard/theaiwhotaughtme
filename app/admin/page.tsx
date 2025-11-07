@@ -5,7 +5,7 @@ import type { Story } from '@/lib/db';
 
 export default function AdminPage() {
   const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
