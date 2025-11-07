@@ -11,15 +11,14 @@ export default function TeacherCTA() {
           Share your story and help other educators discover new possibilities.
           We'd love to hear how you're using AI in your classroom.
         </p>
-        <button
-          className="bg-white text-[#e89523] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
-          onClick={() => {
-            // Will link to /contribute in Phase 2
-            alert('Teacher submission form coming soon!');
-          }}
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSfutjWl9-vj0PZP3TI73NEXrmlyp_EherjrTZqimulVrjIYjA/viewform?usp=dialog"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-white text-[#e89523] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
         >
           Share Your Story
-        </button>
+        </a>
         <p className="mt-4 text-sm opacity-75">
           Selected stories receive a gift card as a thank you
         </p>
