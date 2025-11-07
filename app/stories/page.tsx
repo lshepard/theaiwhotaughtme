@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function SubmitStoryPage() {
   const [step, setStep] = useState(1);
@@ -68,8 +69,21 @@ export default function SubmitStoryPage() {
 
   if (submitSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a4a5a] via-[#0d1f26] to-[#1a4a5a] flex items-center justify-center px-4">
-        <div className="max-w-2xl w-full bg-white rounded-lg shadow-2xl p-8 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#1a4a5a] via-[#0d1f26] to-[#1a4a5a]">
+        {/* Navigation Header */}
+        <nav className="bg-[#1a4a5a]/80 backdrop-blur-sm border-b border-cyan-500/20">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <svg className="w-6 h-6 text-[#e89523]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <span className="text-white font-bold text-lg">The AI Who Taught Me</span>
+            </Link>
+          </div>
+        </nav>
+
+        <div className="flex items-center justify-center px-4 py-12">
+          <div className="max-w-2xl w-full bg-white rounded-lg shadow-2xl p-8 text-center">
           <div className="mb-6">
             <svg
               className="mx-auto h-16 w-16 text-[#e89523]"
@@ -91,14 +105,28 @@ export default function SubmitStoryPage() {
           <p className="text-lg text-gray-700">
             Your story has been submitted successfully. We appreciate you sharing your experience with us.
           </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a4a5a] via-[#0d1f26] to-[#1a4a5a] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a4a5a] via-[#0d1f26] to-[#1a4a5a]">
+      {/* Navigation Header */}
+      <nav className="bg-[#1a4a5a]/80 backdrop-blur-sm border-b border-cyan-500/20">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <svg className="w-6 h-6 text-[#e89523]" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+            <span className="text-white font-bold text-lg">The AI Who Taught Me</span>
+          </Link>
+        </div>
+      </nav>
+
+      <div className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-[#e89523] via-[#ea9726] to-[#d98520] px-8 py-6">
             <h1 className="text-3xl font-bold text-white mb-2">
@@ -156,6 +184,28 @@ export default function SubmitStoryPage() {
           {/* Step 2: Contact Info */}
           {step === 2 && (
             <form onSubmit={handleSubmit}>
+              {/* Story Preview */}
+              <div className="mb-6 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-[#1a4a5a] uppercase tracking-wide">Your Story</h3>
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="text-[#e89523] hover:text-[#d98520] text-sm font-medium flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
+                </div>
+                <p className="text-[#1a4a5a] whitespace-pre-wrap text-sm leading-relaxed">
+                  {story}
+                </p>
+              </div>
+
+              <h3 className="text-lg font-semibold text-[#1a4a5a] mb-4">Contact Information</h3>
+
               <div className="space-y-4">
                 <div>
                   <label
@@ -233,25 +283,17 @@ export default function SubmitStoryPage() {
                 </div>
               )}
 
-              <div className="mt-6 flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="flex-1 bg-[#1a4a5a]/10 text-[#1a4a5a] py-3 px-6 rounded-lg font-semibold hover:bg-[#1a4a5a]/20 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a4a5a] focus:ring-offset-2"
-                >
-                  ← Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 bg-gradient-to-r from-[#e89523] to-[#d98520] text-white py-3 px-6 rounded-lg font-semibold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#e89523] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit My Story'}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-6 w-full bg-gradient-to-r from-[#e89523] to-[#d98520] text-white py-3 px-6 rounded-lg font-semibold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#e89523] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit My Story'}
+              </button>
             </form>
           )}
           </div>
+        </div>
         </div>
       </div>
     </div>

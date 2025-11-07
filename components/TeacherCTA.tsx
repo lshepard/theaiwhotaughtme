@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function TeacherCTA() {
   return (
     <section className="py-16 px-4 bg-gradient-to-r from-[#e89523] via-[#ea9726] to-[#d98520]">
@@ -11,14 +13,12 @@ export default function TeacherCTA() {
           Share your story and help other educators discover new possibilities.
           We'd love to hear how you're using AI in your classroom.
         </p>
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSfutjWl9-vj0PZP3TI73NEXrmlyp_EherjrTZqimulVrjIYjA/viewform?usp=dialog"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/stories"
           className="inline-block bg-white text-[#e89523] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
         >
           Share Your Story
-        </a>
+        </Link>
         <p className="mt-4 text-sm opacity-75">
           Selected stories receive a gift card as a thank you
         </p>
