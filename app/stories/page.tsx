@@ -13,12 +13,14 @@ interface TimeSlot {
 export default function SubmitStoryPage() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [school, setSchool] = useState('');
   const [grades, setGrades] = useState('');
   const [phone, setPhone] = useState('');
   const [story, setStory] = useState('');
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -28,7 +30,7 @@ export default function SubmitStoryPage() {
     setError('');
 
     // Validate required fields
-    if (!name.trim() || !school.trim() || !grades.trim() || !phone.trim()) {
+    if (!name.trim() || !email.trim() || !school.trim() || !grades.trim() || !phone.trim()) {
       setError('Please fill in all fields.');
       return;
     }
@@ -50,7 +52,15 @@ export default function SubmitStoryPage() {
     }
   };
 
-  const handleBookSlot = async (slot: TimeSlot) => {
+  const handleSelectSlot = (slot: TimeSlot) => {
+    setSelectedSlot(slot);
+    setShowConfirmation(true);
+    setError('');
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!selectedSlot) return;
+
     setIsSubmitting(true);
     setError('');
 
@@ -61,9 +71,10 @@ export default function SubmitStoryPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          start_time: slot.start_time,
-          end_time: slot.end_time,
+          start_time: selectedSlot.start_time,
+          end_time: selectedSlot.end_time,
           name,
+          email,
           phone,
           school,
           grades,
@@ -71,13 +82,15 @@ export default function SubmitStoryPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to book appointment');
+        const errorData = await response.json();
+        console.error('Booking error:', errorData);
+        throw new Error(errorData.error || 'Failed to book appointment');
       }
 
-      setSelectedSlot(slot);
       setStep(3);
-    } catch (err) {
-      setError('Failed to book this time. Please try another slot.');
+      setShowConfirmation(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to book this time. Please try another slot.');
     } finally {
       setIsSubmitting(false);
     }
@@ -273,6 +286,24 @@ export default function SubmitStoryPage() {
 
                   <div>
                     <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                    >
+                      Email <span className="text-[#e89523]">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      placeholder="your.email@school.edu"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label
                       htmlFor="school"
                       className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
                     >
@@ -360,51 +391,122 @@ export default function SubmitStoryPage() {
             </div>
 
             <div className="bg-white dark:bg-[#1a4a5a] rounded-xl shadow-2xl p-8">
-              <div className="space-y-3">
-                {availableSlots.map((slot, index) => (
+              {!showConfirmation ? (
+                <>
+                  <div className="space-y-3">
+                    {availableSlots.map((slot, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSelectSlot(slot)}
+                        className="w-full p-4 bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-[#e89523]/10 hover:to-[#d98520]/10 border-2 border-gray-200 hover:border-[#e89523] rounded-lg text-left transition-all group"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-lg font-semibold text-[#1a4a5a] group-hover:text-[#e89523] transition-colors">
+                              {formatTime(slot.start_time)}
+                            </p>
+                          </div>
+                          <svg
+                            className="w-6 h-6 text-gray-400 group-hover:text-[#e89523] transition-colors"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
                   <button
-                    key={index}
-                    onClick={() => handleBookSlot(slot)}
-                    disabled={isSubmitting}
-                    className="w-full p-4 bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-[#e89523]/10 hover:to-[#d98520]/10 border-2 border-gray-200 hover:border-[#e89523] rounded-lg text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="mt-6 w-full py-3 px-4 text-gray-600 hover:text-[#1a4a5a] font-medium transition-colors"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-lg font-semibold text-[#1a4a5a] group-hover:text-[#e89523] transition-colors">
-                          {formatTime(slot.start_time)}
+                    ← Back
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Confirmation Dialog */}
+                  <div className="space-y-6">
+                    <div className="text-center mb-6">
+                      <h3 className="text-2xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-2">
+                        Confirm Your Appointment
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        Please review your details before booking
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-[#e89523]/10 to-[#d98520]/10 border-2 border-[#e89523] rounded-xl p-6 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Name</p>
+                          <p className="text-lg font-semibold text-[#1a4a5a]">{name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Email</p>
+                          <p className="text-lg font-semibold text-[#1a4a5a]">{email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Phone</p>
+                          <p className="text-lg font-semibold text-[#1a4a5a]">{phone}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">School</p>
+                          <p className="text-lg font-semibold text-[#1a4a5a]">{school}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-sm font-medium text-gray-600">Grades</p>
+                          <p className="text-lg font-semibold text-[#1a4a5a]">{grades}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t-2 border-[#e89523]/30">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Appointment Time</p>
+                        <p className="text-xl font-bold text-[#e89523]">
+                          {selectedSlot && formatTime(selectedSlot.start_time)}
                         </p>
                       </div>
-                      <svg
-                        className="w-6 h-6 text-gray-400 group-hover:text-[#e89523] transition-colors"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
                     </div>
-                  </button>
-                ))}
-              </div>
 
-              {error && (
-                <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
+                    {error && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm text-red-600">{error}</p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowConfirmation(false);
+                          setSelectedSlot(null);
+                        }}
+                        disabled={isSubmitting}
+                        className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50"
+                      >
+                        ← Back to Times
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleConfirmBooking}
+                        disabled={isSubmitting}
+                        className="flex-1 bg-gradient-to-r from-[#e89523] to-[#d98520] text-white py-3 px-6 rounded-lg font-bold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? 'Booking...' : 'Book Now'}
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
-
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="mt-6 w-full py-3 px-4 text-gray-600 hover:text-[#1a4a5a] font-medium transition-colors"
-              >
-                ← Back
-              </button>
             </div>
           </div>
         </section>
