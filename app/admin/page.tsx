@@ -149,20 +149,32 @@ export default function AdminPage() {
                     <h3 className="text-xl font-semibold text-gray-900">
                       {story.name}
                     </h3>
-                    {story.school && (
-                      <p className="text-sm text-gray-500">{story.school}</p>
-                    )}
+                    <div className="mt-1 space-y-1">
+                      {story.school && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">School:</span> {story.school}
+                        </p>
+                      )}
+                      {story.grades && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Grades:</span> {story.grades}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <span className="text-sm text-gray-500">
                     {formatDate(story.created_at)}
                   </span>
                 </div>
 
-                <div className="mb-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">
-                    {story.story}
-                  </p>
-                </div>
+                {story.story && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Story:</h4>
+                    <p className="text-gray-700 whitespace-pre-wrap">
+                      {story.story}
+                    </p>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t border-gray-200 flex gap-6 text-sm">
                   {story.email && (

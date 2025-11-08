@@ -4,31 +4,24 @@ import { insertStory } from '@/lib/db';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { story, name, email, phone, school } = body;
+    const { story, name, email, phone, school, grades } = body;
 
     // Validate required fields
-    if (!story || !name) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'Story and name are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate that at least email or phone is provided
-    if (!email && !phone) {
-      return NextResponse.json(
-        { error: 'Either email or phone must be provided' },
+        { error: 'Name is required' },
         { status: 400 }
       );
     }
 
     // Insert into database
     const result = await insertStory({
-      story,
+      story: story || '', // Story is now optional
       name,
       email,
       phone,
       school,
+      grades,
     });
 
     if (!result.success) {
