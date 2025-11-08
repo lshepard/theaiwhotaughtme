@@ -19,7 +19,6 @@ export default function SubmitStoryPage() {
   const [role, setRole] = useState('');
   const [aiUsage, setAiUsage] = useState('');
   const [phone, setPhone] = useState('');
-  const [story, setStory] = useState('');
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -32,9 +31,25 @@ export default function SubmitStoryPage() {
     setError('');
 
     // Validate required fields
-    if (!name.trim() || !email.trim() || !school.trim() || !phone.trim() || !aiUsage.trim()) {
+    if (!name.trim() || !email.trim() || !school.trim() || !aiUsage.trim()) {
       setError('Please fill in all required fields.');
       return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    // Validate phone format only if provided
+    if (phone.trim()) {
+      const phoneDigits = phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+        setError('Please enter a valid phone number (10-15 digits).');
+        return;
+      }
     }
 
     // Fetch available time slots
@@ -45,7 +60,7 @@ export default function SubmitStoryPage() {
         throw new Error('Failed to fetch availability');
       }
       const data = await response.json();
-      setAvailableSlots(data.slots.slice(0, 6)); // Get first 6 slots
+      setAvailableSlots(data.slots); // Get all slots from first 5 days
       setStep(2);
     } catch (err) {
       setError('Failed to load available times. Please try again.');
@@ -91,7 +106,7 @@ export default function SubmitStoryPage() {
         throw new Error(errorData.error || 'Failed to book appointment');
       }
 
-      setStep(3);
+      setSubmitSuccess(true);
       setShowConfirmation(false);
     } catch (err: any) {
       setError(err.message || 'Failed to book this time. Please try another slot.');
@@ -100,41 +115,6 @@ export default function SubmitStoryPage() {
     }
   };
 
-  const handleStorySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/submit-story', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          story,
-          name,
-          phone,
-          school,
-          grades,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit story');
-      }
-
-      setSubmitSuccess(true);
-    } catch (err) {
-      setError('Failed to submit your story. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSkipStory = () => {
-    setSubmitSuccess(true);
-  };
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -181,9 +161,32 @@ export default function SubmitStoryPage() {
     return grouped;
   };
 
+  const generateCalendarUrls = (slot: TimeSlot) => {
+    const title = 'Teacher Interview - The AI Who Taught Me';
+    const description = 'Discussion about AI usage in the classroom with The AI Who Taught Me podcast.';
+    const location = 'Video call (details in confirmation email)';
+
+    const startTime = new Date(slot.start_time);
+    const endTime = new Date(slot.end_time);
+
+    // Format for different calendar services
+    const startFormatted = startTime.toISOString().replace(/-|:|\.\d\d\d/g, '');
+    const endFormatted = endTime.toISOString().replace(/-|:|\.\d\d\d/g, '');
+
+    return {
+      google: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startFormatted}/${endFormatted}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`,
+      outlook: `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(title)}&startdt=${startTime.toISOString()}&enddt=${endTime.toISOString()}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`,
+      office365: `https://outlook.office.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(title)}&startdt=${startTime.toISOString()}&enddt=${endTime.toISOString()}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`,
+      yahoo: `https://calendar.yahoo.com/?v=60&title=${encodeURIComponent(title)}&st=${startFormatted}&et=${endFormatted}&desc=${encodeURIComponent(description)}&in_loc=${encodeURIComponent(location)}`,
+      ics: `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ADTSTART:${startFormatted}%0ADTEND:${endFormatted}%0ASUMMARY:${encodeURIComponent(title)}%0ADESCRIPTION:${encodeURIComponent(description)}%0ALOCATION:${encodeURIComponent(location)}%0AEND:VEVENT%0AEND:VCALENDAR`,
+    };
+  };
+
   if (submitSuccess) {
+    const calendarUrls = selectedSlot ? generateCalendarUrls(selectedSlot) : null;
+
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0d1f26]">
+      <div className="min-h-screen bg-[#1a4a5a]">
         {/* Navigation Header */}
         <nav className="bg-[#1a4a5a] border-b border-cyan-500/20">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -214,18 +217,59 @@ export default function SubmitStoryPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-4xl font-bold text-[#1a4a5a] mb-4">
+            <h1 className="text-4xl font-bold text-white mb-4">
               All Set!
             </h1>
             {selectedSlot && (
-              <div className="mb-6 p-4 bg-cyan-50 rounded-lg inline-block">
-                <p className="text-sm font-semibold text-[#1a4a5a] mb-1">Your appointment is scheduled for:</p>
+              <div className="mb-6 p-4 bg-white/10 border-2 border-[#e89523] rounded-lg inline-block">
+                <p className="text-sm font-semibold text-cyan-100 mb-1">Your appointment is scheduled for:</p>
                 <p className="text-lg font-bold text-[#e89523]">{formatTime(selectedSlot.start_time)}</p>
               </div>
             )}
-            <p className="text-lg text-gray-700 mb-8">
+            <p className="text-lg text-cyan-100 mb-8">
               We look forward to talking with you. You should receive a calendar invitation shortly.
             </p>
+
+            {/* Add to Calendar Links */}
+            {calendarUrls && (
+              <div className="mb-8">
+                <p className="text-sm font-semibold text-cyan-100 mb-4">Add to your calendar:</p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <a
+                    href={calendarUrls.google}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    Google Calendar
+                  </a>
+                  <a
+                    href={calendarUrls.outlook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    Outlook
+                  </a>
+                  <a
+                    href={calendarUrls.office365}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    Office 365
+                  </a>
+                  <a
+                    href={calendarUrls.ics}
+                    download="interview.ics"
+                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                  >
+                    Apple Calendar
+                  </a>
+                </div>
+              </div>
+            )}
+
             <Link
               href="/"
               className="inline-block bg-gradient-to-r from-[#e89523] to-[#d98520] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg"
@@ -333,6 +377,8 @@ export default function SubmitStoryPage() {
                       id="email"
                       className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
                       placeholder="your.email@school.edu"
+                      pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                      title="Please enter a valid email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -403,16 +449,16 @@ export default function SubmitStoryPage() {
                       htmlFor="phone"
                       className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
                     >
-                      Phone <span className="text-[#e89523]">*</span>
+                      Phone (Optional)
                     </label>
                     <input
                       type="tel"
                       id="phone"
                       className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
-                      placeholder="(555) 123-4567"
+                      placeholder="555-123-4567 or +1-555-123-4567"
+                      title="Please enter a valid phone number (10-15 digits)"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      required
                     />
                   </div>
 
@@ -531,10 +577,12 @@ export default function SubmitStoryPage() {
                           <p className="text-sm font-medium text-gray-600">Email</p>
                           <p className="text-lg font-semibold text-[#1a4a5a]">{email}</p>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Phone</p>
-                          <p className="text-lg font-semibold text-[#1a4a5a]">{phone}</p>
-                        </div>
+                        {phone && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Phone</p>
+                            <p className="text-lg font-semibold text-[#1a4a5a]">{phone}</p>
+                          </div>
+                        )}
                         <div>
                           <p className="text-sm font-medium text-gray-600">School</p>
                           <p className="text-lg font-semibold text-[#1a4a5a]">{school}</p>
@@ -595,64 +643,6 @@ export default function SubmitStoryPage() {
                   </div>
                 </>
               )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Step 3: Optional Story */}
-      {step === 3 && (
-        <section className="py-16 px-4 bg-gradient-to-br from-[#f5f5f5] to-white dark:from-[#0d1f26] dark:to-[#1a4a5a]/20">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-3">
-                One More Thing... (Optional)
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Want to share your story with us before we talk?
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-[#1a4a5a] rounded-xl shadow-2xl p-8">
-              <form onSubmit={handleStorySubmit}>
-                <label
-                  htmlFor="story"
-                  className="block text-lg font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-3"
-                >
-                  Your Story (Optional)
-                </label>
-                <textarea
-                  id="story"
-                  rows={10}
-                  className="w-full px-5 py-4 text-lg border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] resize-none dark:bg-white dark:text-gray-900"
-                  placeholder="Tell us about your experience with AI in the classroom... (You can also wait to share this during our conversation)"
-                  value={story}
-                  onChange={(e) => setStory(e.target.value)}
-                />
-
-                {error && (
-                  <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-600">{error}</p>
-                  </div>
-                )}
-
-                <div className="mt-8 flex gap-4">
-                  <button
-                    type="button"
-                    onClick={handleSkipStory}
-                    className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-                  >
-                    Skip for Now
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1 bg-gradient-to-r from-[#e89523] to-[#d98520] text-white py-3 px-6 rounded-lg font-bold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Submit Story'}
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         </section>

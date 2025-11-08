@@ -15,9 +15,9 @@ export async function GET() {
       );
     }
 
-    // Calculate start and end times (next 7 days)
+    // Calculate start and end times (next 30 days to find available slots)
     const startTime = new Date(Date.now()).toISOString().split('T')[0]; // Today's date
-    const endTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 7 days from now
+    const endTime = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30 days from now
 
     console.log('📅 Fetching Cal.com availability...');
     console.log('   Username:', calUsername);
@@ -45,12 +45,21 @@ export async function GET() {
 
     const data = await response.json();
 
+    console.log('📦 Cal.com response:', JSON.stringify(data, null, 2));
+
     // Transform Cal.com response to match our expected format
     // Cal.com returns: { status: "success", data: { "2024-11-07": [{ start, end }] } }
     const slots: any[] = [];
 
     if (data.status === 'success' && data.data) {
-      Object.entries(data.data).forEach(([date, dateSlots]: [string, any]) => {
+      // Get all dates sorted chronologically
+      const sortedDates = Object.keys(data.data).sort();
+
+      // Take only the first 5 days that have availability
+      const daysToShow = sortedDates.slice(0, 5);
+
+      daysToShow.forEach((date) => {
+        const dateSlots = data.data[date];
         dateSlots.forEach((slot: any) => {
           slots.push({
             start_time: slot.start,
@@ -61,11 +70,11 @@ export async function GET() {
       });
     }
 
-    console.log(`✅ Found ${slots.length} available time slots`);
+    console.log(`✅ Found ${slots.length} available time slots across ${Object.keys(data.data || {}).length} days`);
 
     return NextResponse.json({
       success: true,
-      slots: slots, // Return all slots
+      slots: slots, // Return slots for first 5 available days
     });
   } catch (error) {
     console.error('Error fetching Cal.com availability:', error);

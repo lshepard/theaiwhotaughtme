@@ -17,12 +17,11 @@ export async function POST(request: NextRequest) {
     console.log('   aiUsage:', aiUsage);
 
     // Validate required fields
-    if (!start_time || !name || !email || !phone || !aiUsage) {
+    if (!start_time || !name || !email || !aiUsage) {
       console.error('❌ Missing required fields:');
       console.error('   start_time:', !!start_time);
       console.error('   name:', !!name);
       console.error('   email:', !!email);
-      console.error('   phone:', !!phone);
       console.error('   aiUsage:', !!aiUsage);
       return NextResponse.json(
         { error: 'Missing required booking information' },
@@ -44,20 +43,44 @@ export async function POST(request: NextRequest) {
 
     console.log('📅 Creating Cal.com booking...');
     console.log('   Name:', name);
-    console.log('   Email:', email);
+    console.log('   Email:', email.trim().toLowerCase());
     console.log('   Time:', start_time);
 
+    // Format phone number if provided (E.164 format)
+    let formattedPhone = null;
+    if (phone && phone.trim()) {
+      const hasPlus = phone.trim().startsWith('+');
+      formattedPhone = phone.replace(/\D/g, ''); // Remove all non-digits
+
+      if (!hasPlus) {
+        // Assume US/Canada if no + country code prefix
+        formattedPhone = '+1' + formattedPhone;
+      } else {
+        formattedPhone = '+' + formattedPhone;
+      }
+
+      console.log('   Formatted phone:', formattedPhone);
+    } else {
+      console.log('   Phone: (not provided)');
+    }
+
     // Create booking using Cal.com API v2
+    const attendeeData: any = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+
+    // Only add phone number if provided
+    if (formattedPhone) {
+      attendeeData.phoneNumber = formattedPhone;
+    }
+
     const bookingPayload = {
       start: start_time,
       eventTypeSlug: calEventSlug,
       username: calUsername,
-      attendee: {
-        name: name,
-        email: email,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        phoneNumber: phone,
-      },
+      attendee: attendeeData,
       metadata: {
         school: school || 'N/A',
         role: role || 'N/A',
@@ -81,7 +104,15 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Cal.com booking error:', errorText);
-      throw new Error('Failed to book appointment with Cal.com');
+
+      // Try to parse the error message from Cal.com
+      try {
+        const errorData = JSON.parse(errorText);
+        const errorMessage = errorData.error?.message || errorData.message || 'Failed to book appointment';
+        throw new Error(errorMessage);
+      } catch (parseError) {
+        throw new Error('Failed to book appointment with Cal.com');
+      }
     }
 
     const data = await response.json();
