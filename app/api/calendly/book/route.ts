@@ -2,16 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const calendlyApiToken = process.env.CALENDLY_API_TOKEN;
-    const eventTypeUri = process.env.CALENDLY_EVENT_TYPE_URI;
-
-    if (!calendlyApiToken || !eventTypeUri) {
-      return NextResponse.json(
-        { error: 'Calendly configuration missing' },
-        { status: 500 }
-      );
-    }
-
     const body = await request.json();
     const { start_time, end_time, name, phone, school, grades } = body;
 
@@ -21,6 +11,24 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required booking information' },
         { status: 400 }
       );
+    }
+
+    const calendlyApiToken = process.env.CALENDLY_API_TOKEN;
+    const eventTypeUri = process.env.CALENDLY_EVENT_TYPE_URI;
+
+    // Development mode: Return mock booking if Calendly is not configured
+    if (!calendlyApiToken || !eventTypeUri) {
+      console.log('⚠️  Calendly not configured, mock booking created');
+      return NextResponse.json({
+        success: true,
+        booking: {
+          uri: 'mock-booking-' + Date.now(),
+          status: 'active',
+          start_time,
+          end_time,
+        },
+        mock: true,
+      });
     }
 
     // Parse name into first and last

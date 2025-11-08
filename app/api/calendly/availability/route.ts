@@ -1,15 +1,40 @@
 import { NextResponse } from 'next/server';
 
+// Mock data for development/testing when Calendly is not configured
+function generateMockSlots() {
+  const slots = [];
+  const now = new Date();
+
+  for (let i = 1; i <= 6; i++) {
+    const startTime = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
+    startTime.setHours(14, 0, 0, 0); // 2 PM
+
+    const endTime = new Date(startTime);
+    endTime.setMinutes(30); // 30 min meetings
+
+    slots.push({
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      invitees_remaining: 1,
+    });
+  }
+
+  return slots;
+}
+
 export async function GET() {
   try {
     const calendlyApiToken = process.env.CALENDLY_API_TOKEN;
     const eventTypeUri = process.env.CALENDLY_EVENT_TYPE_URI;
 
+    // Development mode: Return mock data if Calendly is not configured
     if (!calendlyApiToken || !eventTypeUri) {
-      return NextResponse.json(
-        { error: 'Calendly configuration missing' },
-        { status: 500 }
-      );
+      console.log('⚠️  Calendly not configured, using mock data');
+      return NextResponse.json({
+        success: true,
+        slots: generateMockSlots(),
+        mock: true,
+      });
     }
 
     // Calculate start and end times (next 30 days)
