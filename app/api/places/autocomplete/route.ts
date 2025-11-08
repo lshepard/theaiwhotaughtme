@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const input = searchParams.get('input');
 
     if (!input || input.trim().length < 2) {
-      return NextResponse.json({ predictions: [] });
+      return NextResponse.json({ suggestions: [] });
     }
 
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -19,19 +19,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Use Places API Autocomplete to search for schools
-    const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
-    url.searchParams.set('input', input);
-    url.searchParams.set('types', 'school');
-    url.searchParams.set('key', apiKey);
+    // Use NEW Places API (Text Search) for autocomplete
+    // This is the modern API with better pricing and features
+    const url = 'https://places.googleapis.com/v1/places:searchText';
 
     console.log('🔍 Searching for schools:', input);
 
-    const response = await fetch(url.toString());
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress',
+      },
+      body: JSON.stringify({
+        textQuery: input,
+        includedType: 'school',
+        maxResultCount: 5,
+      }),
+    });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('❌ Google Places API error:', error);
+      console.error('❌ Google Places API (New) error:', error);
       return NextResponse.json(
         { error: 'Failed to fetch suggestions' },
         { status: 500 }
@@ -40,18 +50,10 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      console.error('❌ Google Places API status:', data.status);
-      return NextResponse.json(
-        { error: data.error_message || 'API error' },
-        { status: 500 }
-      );
-    }
-
-    // Extract just the school names
-    const suggestions = (data.predictions || []).map((prediction: any) => ({
-      name: prediction.structured_formatting?.main_text || prediction.description,
-      fullAddress: prediction.description,
+    // Extract school names from new API format
+    const suggestions = (data.places || []).map((place: any) => ({
+      name: place.displayName?.text || 'Unknown School',
+      fullAddress: place.formattedAddress || '',
     }));
 
     console.log(`✅ Found ${suggestions.length} school suggestions`);
