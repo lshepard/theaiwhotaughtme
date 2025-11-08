@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { start_time, end_time, name, phone, school, grades } = body;
+    const { start_time, end_time, name, email, phone, school, grades } = body;
 
     // Validate required fields
-    if (!start_time || !end_time || !name || !phone) {
+    if (!start_time || !end_time || !name || !email || !phone) {
       return NextResponse.json(
         { error: 'Missing required booking information' },
         { status: 400 }
@@ -29,6 +29,11 @@ export async function POST(request: NextRequest) {
     const firstName = nameParts[0];
     const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
+    console.log('📅 Booking appointment...');
+    console.log('   Name:', name);
+    console.log('   Email:', email);
+    console.log('   Time:', start_time);
+
     // Create scheduled event using Calendly Scheduling API
     const bookingPayload = {
       event_type: eventTypeUri,
@@ -36,7 +41,7 @@ export async function POST(request: NextRequest) {
       end_time: end_time,
       invitee: {
         name: name,
-        email: `${phone.replace(/\D/g, '')}@temp.calendly.com`, // Temporary email if not provided
+        email: email,
         first_name: firstName,
         last_name: lastName || 'N/A',
         phone_number: phone,
