@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const PODBEAN_RSS_URL = 'https://www.theaiwhotaughtme.com/feed.xml';
+import { PODBEAN_RSS_URL } from '@/lib/rss';
 
 export async function GET() {
   try {
