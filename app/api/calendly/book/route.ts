@@ -3,65 +3,76 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { start_time, end_time, name, email, phone, school, grades } = body;
+    const { start_time, end_time, name, email, phone, school, grades, role, aiUsage } = body;
+
+    console.log('📅 Booking request received:');
+    console.log('   start_time:', start_time);
+    console.log('   end_time:', end_time);
+    console.log('   name:', name);
+    console.log('   email:', email);
+    console.log('   phone:', phone);
+    console.log('   school:', school);
+    console.log('   grades:', grades);
+    console.log('   role:', role);
+    console.log('   aiUsage:', aiUsage);
 
     // Validate required fields
-    if (!start_time || !end_time || !name || !email || !phone) {
+    if (!start_time || !name || !email || !phone || !aiUsage) {
+      console.error('❌ Missing required fields:');
+      console.error('   start_time:', !!start_time);
+      console.error('   name:', !!name);
+      console.error('   email:', !!email);
+      console.error('   phone:', !!phone);
+      console.error('   aiUsage:', !!aiUsage);
       return NextResponse.json(
         { error: 'Missing required booking information' },
         { status: 400 }
       );
     }
 
-    const calendlyApiToken = process.env.CALENDLY_API_TOKEN;
-    const eventTypeUri = process.env.CALENDLY_EVENT_TYPE_URI;
+    const calApiKey = process.env.CAL_API_KEY;
+    const calUsername = process.env.CAL_USERNAME || 'theaiwhotaughtme';
+    const calEventSlug = process.env.CAL_EVENT_SLUG || '30min';
 
-    if (!calendlyApiToken || !eventTypeUri) {
-      console.error('❌ Calendly not configured');
+    if (!calApiKey) {
+      console.error('❌ Cal.com not configured');
       return NextResponse.json(
-        { error: 'Calendly configuration missing. Please contact support.' },
+        { error: 'Cal.com configuration missing. Please contact support.' },
         { status: 500 }
       );
     }
 
-    // Parse name into first and last
-    const nameParts = name.trim().split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-
-    console.log('📅 Booking appointment...');
+    console.log('📅 Creating Cal.com booking...');
     console.log('   Name:', name);
     console.log('   Email:', email);
     console.log('   Time:', start_time);
 
-    // Create scheduled event using Calendly Scheduling API
+    // Create booking using Cal.com API v2
     const bookingPayload = {
-      event_type: eventTypeUri,
-      start_time: start_time,
-      end_time: end_time,
-      invitee: {
+      start: start_time,
+      eventTypeSlug: calEventSlug,
+      username: calUsername,
+      attendee: {
         name: name,
         email: email,
-        first_name: firstName,
-        last_name: lastName || 'N/A',
-        phone_number: phone,
-        questions_and_answers: [
-          {
-            question: 'School',
-            answer: school || 'N/A',
-          },
-          {
-            question: 'Grades Taught',
-            answer: grades || 'N/A',
-          },
-        ],
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        phoneNumber: phone,
+      },
+      metadata: {
+        school: school || 'N/A',
+        role: role || 'N/A',
+        grades: grades || 'N/A',
+        aiUsage: aiUsage,
       },
     };
 
-    const response = await fetch('https://api.calendly.com/scheduled_events', {
+    console.log('📤 Sending booking request to Cal.com...');
+
+    const response = await fetch('https://api.cal.com/v2/bookings', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${calendlyApiToken}`,
+        'cal-api-version': '2024-08-13',
+        'Authorization': `Bearer ${calApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(bookingPayload),
@@ -69,18 +80,21 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Calendly booking error:', errorText);
-      throw new Error('Failed to book appointment with Calendly');
+      console.error('❌ Cal.com booking error:', errorText);
+      throw new Error('Failed to book appointment with Cal.com');
     }
 
     const data = await response.json();
 
+    console.log('✅ Booking created successfully');
+    console.log('   Booking ID:', data.data?.id);
+
     return NextResponse.json({
       success: true,
-      booking: data.resource,
+      booking: data.data,
     });
   } catch (error) {
-    console.error('Error booking Calendly appointment:', error);
+    console.error('Error booking Cal.com appointment:', error);
     return NextResponse.json(
       { error: 'Failed to book appointment' },
       { status: 500 }

@@ -16,6 +16,8 @@ export default function SubmitStoryPage() {
   const [email, setEmail] = useState('');
   const [school, setSchool] = useState('');
   const [grades, setGrades] = useState('');
+  const [role, setRole] = useState('');
+  const [aiUsage, setAiUsage] = useState('');
   const [phone, setPhone] = useState('');
   const [story, setStory] = useState('');
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
@@ -30,8 +32,8 @@ export default function SubmitStoryPage() {
     setError('');
 
     // Validate required fields
-    if (!name.trim() || !email.trim() || !school.trim() || !grades.trim() || !phone.trim()) {
-      setError('Please fill in all fields.');
+    if (!name.trim() || !email.trim() || !school.trim() || !phone.trim() || !aiUsage.trim()) {
+      setError('Please fill in all required fields.');
       return;
     }
 
@@ -77,7 +79,9 @@ export default function SubmitStoryPage() {
           email,
           phone,
           school,
+          role,
           grades,
+          aiUsage,
         }),
       });
 
@@ -142,6 +146,39 @@ export default function SubmitStoryPage() {
       minute: '2-digit',
       timeZoneName: 'short',
     });
+  };
+
+  const formatDayHeader = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatTimeOnly = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
+  const groupSlotsByDay = (slots: TimeSlot[]) => {
+    const grouped: { [key: string]: TimeSlot[] } = {};
+
+    slots.forEach(slot => {
+      const date = new Date(slot.start_time);
+      const dayKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+
+      if (!grouped[dayKey]) {
+        grouped[dayKey] = [];
+      }
+      grouped[dayKey].push(slot);
+    });
+
+    return grouped;
   };
 
   if (submitSuccess) {
@@ -322,10 +359,34 @@ export default function SubmitStoryPage() {
 
                   <div>
                     <label
+                      htmlFor="role"
+                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                    >
+                      Role (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      id="role"
+                      list="role-options"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      placeholder="Select or type your role..."
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                    />
+                    <datalist id="role-options">
+                      <option value="Classroom Teacher" />
+                      <option value="Special Education Teacher" />
+                      <option value="Curriculum Advisor" />
+                      <option value="SECA" />
+                    </datalist>
+                  </div>
+
+                  <div>
+                    <label
                       htmlFor="grades"
                       className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
                     >
-                      Grades <span className="text-[#e89523]">*</span>
+                      Grades (Optional)
                     </label>
                     <input
                       type="text"
@@ -334,7 +395,6 @@ export default function SubmitStoryPage() {
                       placeholder="e.g., 3rd-5th, High School, K-12"
                       value={grades}
                       onChange={(e) => setGrades(e.target.value)}
-                      required
                     />
                   </div>
 
@@ -352,6 +412,24 @@ export default function SubmitStoryPage() {
                       placeholder="(555) 123-4567"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="aiUsage"
+                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                    >
+                      How are you using AI in your classroom? <span className="text-[#e89523]">*</span>
+                    </label>
+                    <textarea
+                      id="aiUsage"
+                      rows={2}
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] resize-none dark:bg-white dark:text-gray-900"
+                      placeholder="Brief description..."
+                      value={aiUsage}
+                      onChange={(e) => setAiUsage(e.target.value)}
                       required
                     />
                   </div>
@@ -393,36 +471,34 @@ export default function SubmitStoryPage() {
             <div className="bg-white dark:bg-[#1a4a5a] rounded-xl shadow-2xl p-8">
               {!showConfirmation ? (
                 <>
-                  <div className="space-y-3">
-                    {availableSlots.map((slot, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSelectSlot(slot)}
-                        className="w-full p-4 bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-[#e89523]/10 hover:to-[#d98520]/10 border-2 border-gray-200 hover:border-[#e89523] rounded-lg text-left transition-all group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-lg font-semibold text-[#1a4a5a] group-hover:text-[#e89523] transition-colors">
-                              {formatTime(slot.start_time)}
-                            </p>
-                          </div>
-                          <svg
-                            className="w-6 h-6 text-gray-400 group-hover:text-[#e89523] transition-colors"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
+                  <div className="space-y-6">
+                    {Object.entries(groupSlotsByDay(availableSlots)).map(([dayKey, daySlots]) => (
+                      <div key={dayKey}>
+                        <h3 className="text-xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-3">
+                          {formatDayHeader(daySlots[0].start_time)}
+                        </h3>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                          {daySlots.map((slot, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleSelectSlot(slot)}
+                              className="px-4 py-3 bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-[#e89523] hover:to-[#d98520] border-2 border-gray-200 hover:border-[#e89523] rounded-lg text-center transition-all hover:text-white font-semibold text-[#1a4a5a] hover:scale-105"
+                            >
+                              {formatTimeOnly(slot.start_time)}
+                            </button>
+                          ))}
                         </div>
-                      </button>
+                      </div>
                     ))}
                   </div>
+
+                  {availableSlots.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500 dark:text-gray-400">
+                        No available time slots found. Please try again later.
+                      </p>
+                    </div>
+                  )}
 
                   <button
                     type="button"
@@ -445,7 +521,7 @@ export default function SubmitStoryPage() {
                       </p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-[#e89523]/10 to-[#d98520]/10 border-2 border-[#e89523] rounded-xl p-6 space-y-4">
+                    <div className="bg-white border-2 border-gray-200 rounded-xl p-6 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Name</p>
@@ -463,9 +539,21 @@ export default function SubmitStoryPage() {
                           <p className="text-sm font-medium text-gray-600">School</p>
                           <p className="text-lg font-semibold text-[#1a4a5a]">{school}</p>
                         </div>
+                        {role && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Role</p>
+                            <p className="text-lg font-semibold text-[#1a4a5a]">{role}</p>
+                          </div>
+                        )}
+                        {grades && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Grades</p>
+                            <p className="text-lg font-semibold text-[#1a4a5a]">{grades}</p>
+                          </div>
+                        )}
                         <div className="col-span-2">
-                          <p className="text-sm font-medium text-gray-600">Grades</p>
-                          <p className="text-lg font-semibold text-[#1a4a5a]">{grades}</p>
+                          <p className="text-sm font-medium text-gray-600">AI Usage</p>
+                          <p className="text-base font-semibold text-[#1a4a5a]">{aiUsage}</p>
                         </div>
                       </div>
 
