@@ -37,9 +37,10 @@ export async function GET() {
       });
     }
 
-    // Calculate start and end times (next 30 days)
-    const startTime = new Date().toISOString();
-    const endTime = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    // Calculate start and end times (next 7 days - Calendly max)
+    // Start 1 hour from now to ensure it's in the future
+    const startTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const endTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Fetch available times from Calendly API
     const response = await fetch(
