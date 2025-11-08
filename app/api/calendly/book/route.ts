@@ -16,19 +16,12 @@ export async function POST(request: NextRequest) {
     const calendlyApiToken = process.env.CALENDLY_API_TOKEN;
     const eventTypeUri = process.env.CALENDLY_EVENT_TYPE_URI;
 
-    // Development mode: Return mock booking if Calendly is not configured
     if (!calendlyApiToken || !eventTypeUri) {
-      console.log('⚠️  Calendly not configured, mock booking created');
-      return NextResponse.json({
-        success: true,
-        booking: {
-          uri: 'mock-booking-' + Date.now(),
-          status: 'active',
-          start_time,
-          end_time,
-        },
-        mock: true,
-      });
+      console.error('❌ Calendly not configured');
+      return NextResponse.json(
+        { error: 'Calendly configuration missing. Please contact support.' },
+        { status: 500 }
+      );
     }
 
     // Parse name into first and last

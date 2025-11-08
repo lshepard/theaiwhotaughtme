@@ -1,41 +1,17 @@
 import { NextResponse } from 'next/server';
 
-// Mock data for development/testing when Calendly is not configured
-function generateMockSlots() {
-  const slots = [];
-  const now = new Date();
-
-  for (let i = 1; i <= 6; i++) {
-    const startTime = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-    startTime.setHours(14, 0, 0, 0); // 2 PM
-
-    const endTime = new Date(startTime);
-    endTime.setMinutes(30); // 30 min meetings
-
-    slots.push({
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      invitees_remaining: 1,
-    });
-  }
-
-  return slots;
-}
-
 export async function GET() {
   try {
     const calendlyApiToken = process.env.CALENDLY_API_TOKEN;
     const eventTypeUri = process.env.CALENDLY_EVENT_TYPE_URI;
 
-    // Development mode: Return mock data if Calendly is not configured
     if (!calendlyApiToken || !eventTypeUri) {
-      console.log('⚠️  Calendly not configured, using mock data');
+      console.error('❌ Calendly not configured');
       console.log('   Set CALENDLY_API_TOKEN and CALENDLY_EVENT_TYPE_URI in .env.local');
-      return NextResponse.json({
-        success: true,
-        slots: generateMockSlots(),
-        mock: true,
-      });
+      return NextResponse.json(
+        { error: 'Calendly configuration missing. Please contact support.' },
+        { status: 500 }
+      );
     }
 
     // Validate event type URI format
@@ -43,12 +19,10 @@ export async function GET() {
       console.error('❌ Invalid CALENDLY_EVENT_TYPE_URI format');
       console.log('   Expected: https://api.calendly.com/event_types/YOUR_UUID');
       console.log('   Got:', eventTypeUri);
-      console.log('   Falling back to mock data');
-      return NextResponse.json({
-        success: true,
-        slots: generateMockSlots(),
-        mock: true,
-      });
+      return NextResponse.json(
+        { error: 'Calendly configuration invalid. Please contact support.' },
+        { status: 500 }
+      );
     }
 
     // Calculate start and end times (next 7 days - Calendly max)
@@ -74,15 +48,15 @@ export async function GET() {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Calendly API error:', errorText);
-      console.log('   Falling back to mock data');
-      return NextResponse.json({
-        success: true,
-        slots: generateMockSlots(),
-        mock: true,
-      });
+      return NextResponse.json(
+        { error: 'Failed to fetch availability from Calendly. Please try again later.' },
+        { status: 500 }
+      );
     }
 
     const data = await response.json();
+
+    console.log(`✅ Found ${data.collection?.length || 0} available time slots`);
 
     return NextResponse.json({
       success: true,
@@ -91,7 +65,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching Calendly availability:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch availability' },
+      { error: 'Failed to fetch availability. Please try again later.' },
       { status: 500 }
     );
   }
