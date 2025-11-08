@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Navigation from '@/components/Navigation';
 
 interface TimeSlot {
   start_time: string;
@@ -55,7 +56,7 @@ export default function SubmitStoryPage() {
     // Fetch available time slots
     setIsLoading(true);
     try {
-      const response = await fetch('/api/calendly/availability');
+      const response = await fetch('/api/cal/availability');
       if (!response.ok) {
         throw new Error('Failed to fetch availability');
       }
@@ -82,7 +83,7 @@ export default function SubmitStoryPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/calendly/book', {
+      const response = await fetch('/api/cal/book', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -186,25 +187,15 @@ export default function SubmitStoryPage() {
     const calendarUrls = selectedSlot ? generateCalendarUrls(selectedSlot) : null;
 
     return (
-      <div className="min-h-screen bg-[#1a4a5a]">
-        {/* Navigation Header */}
-        <nav className="bg-[#1a4a5a] border-b border-cyan-500/20">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              <svg className="w-6 h-6 text-[#e89523]" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
-              <span className="text-white font-bold text-lg">The AI Who Taught Me</span>
-            </Link>
-          </div>
-        </nav>
+      <div className="min-h-screen bg-primary">
+        <Navigation />
 
         {/* Success Message */}
         <section className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center">
             <div className="mb-6">
               <svg
-                className="mx-auto h-16 w-16 text-[#e89523]"
+                className="mx-auto h-16 w-16 text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -221,9 +212,9 @@ export default function SubmitStoryPage() {
               All Set!
             </h1>
             {selectedSlot && (
-              <div className="mb-6 p-4 bg-white/10 border-2 border-[#e89523] rounded-lg inline-block">
+              <div className="mb-6 p-4 bg-white/10 border-2 border-accent rounded-lg inline-block">
                 <p className="text-sm font-semibold text-cyan-100 mb-1">Your appointment is scheduled for:</p>
-                <p className="text-lg font-bold text-[#e89523]">{formatTime(selectedSlot.start_time)}</p>
+                <p className="text-lg font-bold text-accent">{formatTime(selectedSlot.start_time)}</p>
               </div>
             )}
             <p className="text-lg text-cyan-100 mb-8">
@@ -239,7 +230,7 @@ export default function SubmitStoryPage() {
                     href={calendarUrls.google}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                    className="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
                   >
                     Google Calendar
                   </a>
@@ -247,7 +238,7 @@ export default function SubmitStoryPage() {
                     href={calendarUrls.outlook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                    className="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
                   >
                     Outlook
                   </a>
@@ -255,14 +246,14 @@ export default function SubmitStoryPage() {
                     href={calendarUrls.office365}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                    className="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
                   >
                     Office 365
                   </a>
                   <a
                     href={calendarUrls.ics}
                     download="interview.ics"
-                    className="px-4 py-2 bg-white text-[#1a4a5a] rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
+                    className="px-4 py-2 bg-white text-primary rounded-lg font-semibold hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg"
                   >
                     Apple Calendar
                   </a>
@@ -272,7 +263,7 @@ export default function SubmitStoryPage() {
 
             <Link
               href="/"
-              className="inline-block bg-gradient-to-r from-[#e89523] to-[#d98520] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg"
+              className="inline-block bg-gradient-to-r from-accent to-accent-dark text-white px-8 py-3 rounded-lg font-semibold hover:from-accent-dark hover:to-accent-darker transition-all shadow-lg"
             >
               Return Home
             </Link>
@@ -284,17 +275,7 @@ export default function SubmitStoryPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0d1f26]">
-      {/* Navigation Header */}
-      <nav className="bg-[#1a4a5a] border-b border-cyan-500/20">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <svg className="w-6 h-6 text-[#e89523]" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-            </svg>
-            <span className="text-white font-bold text-lg">The AI Who Taught Me</span>
-          </Link>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="relative w-full min-h-[400px] md:min-h-[500px] flex items-center overflow-hidden">
@@ -308,7 +289,7 @@ export default function SubmitStoryPage() {
             priority
           />
           {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1a4a5a]/95 via-[#1a4a5a]/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-transparent" />
         </div>
 
         {/* Hero Content */}
@@ -336,7 +317,7 @@ export default function SubmitStoryPage() {
         <section className="py-16 px-4 bg-gradient-to-br from-[#f5f5f5] to-white dark:from-[#0d1f26] dark:to-[#1a4a5a]/20">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-3">
+              <h2 className="text-3xl font-bold text-primary dark:text-cyan-100 mb-3">
                 Tell Us About Yourself
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
@@ -344,20 +325,20 @@ export default function SubmitStoryPage() {
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-[#e89523] to-[#d98520] p-1 rounded-xl shadow-2xl">
-              <div className="bg-white dark:bg-[#1a4a5a] rounded-lg p-8">
+            <div className="bg-gradient-to-br from-accent to-accent-dark p-1 rounded-xl shadow-2xl">
+              <div className="bg-white dark:bg-primary rounded-lg p-8">
                 <div className="space-y-5">
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
-                      Teacher Name <span className="text-[#e89523]">*</span>
+                      Teacher Name <span className="text-accent">*</span>
                     </label>
                     <input
                       type="text"
                       id="name"
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
                       placeholder="Your full name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -368,14 +349,14 @@ export default function SubmitStoryPage() {
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
-                      Email <span className="text-[#e89523]">*</span>
+                      Email <span className="text-accent">*</span>
                     </label>
                     <input
                       type="email"
                       id="email"
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
                       placeholder="your.email@school.edu"
                       pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                       title="Please enter a valid email address"
@@ -388,14 +369,14 @@ export default function SubmitStoryPage() {
                   <div>
                     <label
                       htmlFor="school"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
-                      School <span className="text-[#e89523]">*</span>
+                      School <span className="text-accent">*</span>
                     </label>
                     <input
                       type="text"
                       id="school"
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
                       placeholder="School name"
                       value={school}
                       onChange={(e) => setSchool(e.target.value)}
@@ -406,7 +387,7 @@ export default function SubmitStoryPage() {
                   <div>
                     <label
                       htmlFor="role"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
                       Role (Optional)
                     </label>
@@ -414,7 +395,7 @@ export default function SubmitStoryPage() {
                       type="text"
                       id="role"
                       list="role-options"
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
                       placeholder="Select or type your role..."
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
@@ -430,14 +411,14 @@ export default function SubmitStoryPage() {
                   <div>
                     <label
                       htmlFor="grades"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
                       Grades (Optional)
                     </label>
                     <input
                       type="text"
                       id="grades"
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
                       placeholder="e.g., 3rd-5th, High School, K-12"
                       value={grades}
                       onChange={(e) => setGrades(e.target.value)}
@@ -447,14 +428,14 @@ export default function SubmitStoryPage() {
                   <div>
                     <label
                       htmlFor="phone"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
                       Phone (Optional)
                     </label>
                     <input
                       type="tel"
                       id="phone"
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
                       placeholder="555-123-4567 or +1-555-123-4567"
                       title="Please enter a valid phone number (10-15 digits)"
                       value={phone}
@@ -465,14 +446,14 @@ export default function SubmitStoryPage() {
                   <div>
                     <label
                       htmlFor="aiUsage"
-                      className="block text-sm font-semibold text-[#1a4a5a] dark:text-cyan-100 mb-2"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
                     >
-                      How are you using AI in your classroom? <span className="text-[#e89523]">*</span>
+                      How are you using AI in your classroom? <span className="text-accent">*</span>
                     </label>
                     <textarea
                       id="aiUsage"
                       rows={2}
-                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#e89523] focus:border-[#e89523] resize-none dark:bg-white dark:text-gray-900"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent resize-none dark:bg-white dark:text-gray-900"
                       placeholder="Brief description..."
                       value={aiUsage}
                       onChange={(e) => setAiUsage(e.target.value)}
@@ -491,7 +472,7 @@ export default function SubmitStoryPage() {
                   type="button"
                   onClick={handleStep1Next}
                   disabled={isLoading}
-                  className="mt-8 w-full bg-gradient-to-r from-[#e89523] to-[#d98520] text-white py-4 px-8 rounded-xl text-xl font-bold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-[#e89523]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-8 w-full bg-gradient-to-r from-accent to-accent-dark text-white py-4 px-8 rounded-xl text-xl font-bold hover:from-accent-dark hover:to-accent-darker transition-all shadow-xl hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-accent/50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Loading Available Times...' : 'Next: Choose a Time to Talk →'}
                 </button>
@@ -506,7 +487,7 @@ export default function SubmitStoryPage() {
         <section className="py-16 px-4 bg-gradient-to-br from-[#f5f5f5] to-white dark:from-[#0d1f26] dark:to-[#1a4a5a]/20">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-3">
+              <h2 className="text-3xl font-bold text-primary dark:text-cyan-100 mb-3">
                 Choose a Time to Talk
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
@@ -514,13 +495,13 @@ export default function SubmitStoryPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-[#1a4a5a] rounded-xl shadow-2xl p-8">
+            <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8">
               {!showConfirmation ? (
                 <>
                   <div className="space-y-6">
                     {Object.entries(groupSlotsByDay(availableSlots)).map(([dayKey, daySlots]) => (
                       <div key={dayKey}>
-                        <h3 className="text-xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-3">
+                        <h3 className="text-xl font-bold text-primary dark:text-cyan-100 mb-3">
                           {formatDayHeader(daySlots[0].start_time)}
                         </h3>
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
@@ -528,7 +509,7 @@ export default function SubmitStoryPage() {
                             <button
                               key={index}
                               onClick={() => handleSelectSlot(slot)}
-                              className="px-4 py-3 bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-[#e89523] hover:to-[#d98520] border-2 border-gray-200 hover:border-[#e89523] rounded-lg text-center transition-all hover:text-white font-semibold text-[#1a4a5a] hover:scale-105"
+                              className="px-4 py-3 bg-gradient-to-r from-cyan-50 to-blue-50 hover:from-accent hover:to-accent-dark border-2 border-gray-200 hover:border-accent rounded-lg text-center transition-all hover:text-white font-semibold text-primary hover:scale-105"
                             >
                               {formatTimeOnly(slot.start_time)}
                             </button>
@@ -549,7 +530,7 @@ export default function SubmitStoryPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="mt-6 w-full py-3 px-4 text-gray-600 hover:text-[#1a4a5a] font-medium transition-colors"
+                    className="mt-6 w-full py-3 px-4 text-gray-600 hover:text-primary font-medium transition-colors"
                   >
                     ← Back
                   </button>
@@ -559,7 +540,7 @@ export default function SubmitStoryPage() {
                   {/* Confirmation Dialog */}
                   <div className="space-y-6">
                     <div className="text-center mb-6">
-                      <h3 className="text-2xl font-bold text-[#1a4a5a] dark:text-cyan-100 mb-2">
+                      <h3 className="text-2xl font-bold text-primary dark:text-cyan-100 mb-2">
                         Confirm Your Appointment
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300">
@@ -571,43 +552,43 @@ export default function SubmitStoryPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Name</p>
-                          <p className="text-lg font-semibold text-[#1a4a5a]">{name}</p>
+                          <p className="text-lg font-semibold text-primary">{name}</p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-600">Email</p>
-                          <p className="text-lg font-semibold text-[#1a4a5a]">{email}</p>
+                          <p className="text-lg font-semibold text-primary">{email}</p>
                         </div>
                         {phone && (
                           <div>
                             <p className="text-sm font-medium text-gray-600">Phone</p>
-                            <p className="text-lg font-semibold text-[#1a4a5a]">{phone}</p>
+                            <p className="text-lg font-semibold text-primary">{phone}</p>
                           </div>
                         )}
                         <div>
                           <p className="text-sm font-medium text-gray-600">School</p>
-                          <p className="text-lg font-semibold text-[#1a4a5a]">{school}</p>
+                          <p className="text-lg font-semibold text-primary">{school}</p>
                         </div>
                         {role && (
                           <div>
                             <p className="text-sm font-medium text-gray-600">Role</p>
-                            <p className="text-lg font-semibold text-[#1a4a5a]">{role}</p>
+                            <p className="text-lg font-semibold text-primary">{role}</p>
                           </div>
                         )}
                         {grades && (
                           <div>
                             <p className="text-sm font-medium text-gray-600">Grades</p>
-                            <p className="text-lg font-semibold text-[#1a4a5a]">{grades}</p>
+                            <p className="text-lg font-semibold text-primary">{grades}</p>
                           </div>
                         )}
                         <div className="col-span-2">
                           <p className="text-sm font-medium text-gray-600">AI Usage</p>
-                          <p className="text-base font-semibold text-[#1a4a5a]">{aiUsage}</p>
+                          <p className="text-base font-semibold text-primary">{aiUsage}</p>
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t-2 border-[#e89523]/30">
+                      <div className="pt-4 border-t-2 border-accent/30">
                         <p className="text-sm font-medium text-gray-600 mb-1">Appointment Time</p>
-                        <p className="text-xl font-bold text-[#e89523]">
+                        <p className="text-xl font-bold text-accent">
                           {selectedSlot && formatTime(selectedSlot.start_time)}
                         </p>
                       </div>
@@ -635,7 +616,7 @@ export default function SubmitStoryPage() {
                         type="button"
                         onClick={handleConfirmBooking}
                         disabled={isSubmitting}
-                        className="flex-1 bg-gradient-to-r from-[#e89523] to-[#d98520] text-white py-3 px-6 rounded-lg font-bold hover:from-[#d98520] hover:to-[#c87619] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 bg-gradient-to-r from-accent to-accent-dark text-white py-3 px-6 rounded-lg font-bold hover:from-accent-dark hover:to-accent-darker transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? 'Booking...' : 'Book Now'}
                       </button>

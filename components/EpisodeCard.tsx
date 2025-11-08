@@ -89,7 +89,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
 
           {/* Episode info */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-semibold mb-2 text-[#1a4a5a] dark:text-cyan-100">
+            <h3 className="text-xl font-semibold mb-2 text-primary dark:text-cyan-100">
               {episode.title}
             </h3>
             <p className="text-sm text-teal-600 dark:text-cyan-400 mb-3">

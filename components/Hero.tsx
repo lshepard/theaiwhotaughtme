@@ -13,7 +13,7 @@ export default function Hero() {
           priority
         />
         {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1a4a5a]/95 via-[#1a4a5a]/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-[#1a4a5a]/80 to-transparent" />
       </div>
 
       {/* Content */}

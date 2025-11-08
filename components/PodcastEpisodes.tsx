@@ -7,7 +7,7 @@ export default async function PodcastEpisodes() {
   return (
     <section className="py-16 px-4 bg-white dark:bg-[#0d1f26]">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-[#1a4a5a] dark:text-cyan-100">
+        <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-primary dark:text-cyan-100">
           Episodes
         </h2>
 
