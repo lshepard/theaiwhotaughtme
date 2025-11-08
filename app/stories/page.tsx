@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navigation from '@/components/Navigation';
@@ -9,6 +9,11 @@ interface TimeSlot {
   start_time: string;
   end_time: string;
   invitees_remaining: number;
+}
+
+interface SchoolSuggestion {
+  name: string;
+  fullAddress: string;
 }
 
 export default function SubmitStoryPage() {
@@ -27,6 +32,10 @@ export default function SubmitStoryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [schoolSuggestions, setSchoolSuggestions] = useState<SchoolSuggestion[]>([]);
+  const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
+  const [isSearchingSchools, setIsSearchingSchools] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleStep1Next = async () => {
     setError('');
@@ -116,6 +125,45 @@ export default function SubmitStoryPage() {
     }
   };
 
+  const handleSchoolChange = (value: string) => {
+    setSchool(value);
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // If empty, hide suggestions
+    if (!value.trim()) {
+      setSchoolSuggestions([]);
+      setShowSchoolSuggestions(false);
+      return;
+    }
+
+    // Debounce search - wait 300ms after user stops typing
+    setIsSearchingSchools(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(value)}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSchoolSuggestions(data.suggestions || []);
+          setShowSchoolSuggestions(data.suggestions?.length > 0);
+        }
+      } catch (error) {
+        console.error('Error fetching school suggestions:', error);
+        setSchoolSuggestions([]);
+      } finally {
+        setIsSearchingSchools(false);
+      }
+    }, 300);
+  };
+
+  const handleSchoolSelect = (suggestion: SchoolSuggestion) => {
+    setSchool(suggestion.name);
+    setShowSchoolSuggestions(false);
+    setSchoolSuggestions([]);
+  };
 
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -366,7 +414,7 @@ export default function SubmitStoryPage() {
                     />
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <label
                       htmlFor="school"
                       className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
@@ -377,11 +425,37 @@ export default function SubmitStoryPage() {
                       type="text"
                       id="school"
                       className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
-                      placeholder="School name"
+                      placeholder="Start typing school name..."
                       value={school}
-                      onChange={(e) => setSchool(e.target.value)}
+                      onChange={(e) => handleSchoolChange(e.target.value)}
+                      onBlur={() => setTimeout(() => setShowSchoolSuggestions(false), 200)}
+                      onFocus={() => schoolSuggestions.length > 0 && setShowSchoolSuggestions(true)}
                       required
+                      autoComplete="off"
                     />
+                    {isSearchingSchools && (
+                      <div className="absolute right-3 top-11 text-gray-400">
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                    )}
+                    {showSchoolSuggestions && schoolSuggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {schoolSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleSchoolSelect(suggestion)}
+                            className="w-full px-4 py-3 text-left hover:bg-accent/10 transition-colors border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="font-semibold text-primary">{suggestion.name}</div>
+                            <div className="text-sm text-gray-600">{suggestion.fullAddress}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div>
