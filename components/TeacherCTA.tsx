@@ -10,8 +10,8 @@ export default function TeacherCTA() {
           Are You a Teacher Using AI?
         </h2>
         <p className="text-xl mb-8 opacity-90">
-          Share your story and help other educators discover new possibilities.
-          We'd love to hear how you're using AI in your classroom.
+          Whether you love it or have concerns about it—we want to hear your story.
+          Share what's actually working (or not working) in your classroom.
         </p>
         <Link
           href="/stories"
@@ -19,8 +19,8 @@ export default function TeacherCTA() {
         >
           Share Your Story
         </Link>
-        <p className="mt-4 text-sm opacity-75">
-          Selected stories receive a gift card as a thank you
+        <p className="mt-4 text-base opacity-90">
+          Teachers who join us for an interview receive a <span className="font-bold text-yellow-200">$50 gift card</span> as thanks
         </p>
       </div>
     </section>
