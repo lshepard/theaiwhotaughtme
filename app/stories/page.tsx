@@ -160,7 +160,8 @@ export default function SubmitStoryPage() {
   };
 
   const handleSchoolSelect = (suggestion: SchoolSuggestion) => {
-    setSchool(suggestion.name);
+    // Store full address with city/state, not just the name
+    setSchool(suggestion.fullAddress);
     setShowSchoolSuggestions(false);
     setSchoolSuggestions([]);
   };
