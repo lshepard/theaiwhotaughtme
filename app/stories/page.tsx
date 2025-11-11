@@ -449,9 +449,9 @@ export default function SubmitStoryPage() {
               </p>
               <p>
                 There's no shortage of{' '}
-                <a href="https://cdt.org/insights/report-teachers-hesitant-to-use-ai-due-to-lack-of-training-and-concerns-about-student-privacy/" className="underline hover:text-white transition-colors">reports</a>,{' '}
-                <a href="https://edudownloads.azureedge.net/msdownloads/Microsoft-Global-AI-in-Education-Report-2025.pdf" className="underline hover:text-white transition-colors">surveys</a>,{' '}
-                and <a href="https://wffeducation.org/resources/research-insights/the-ai-dividend-new-survey-shows-ai-is-helping-teachers-reclaim-valuable-time/" className="underline hover:text-white transition-colors">other research</a>{' '}
+                <a href="https://cdt.org/insights/hand-in-hand-schools-embrace-of-ai-connected-to-increased-risks-to-students/" className="underline hover:text-white transition-colors">reports</a>,{' '}
+                <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/bade/documents/products-and-services/en-us/education/2025-Microsoft-AI-in-Education-Report.pdf" className="underline hover:text-white transition-colors">surveys</a>,{' '}
+                and <a href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1647573/full" className="underline hover:text-white transition-colors">papers</a>{' '}
                 written about the use of AI in schools. But the best insights come from those actually in the classroom,
                 experimenting with tools like MagicSchool, Diffit, Gemini and ChatGPT in their classroom.
               </p>
