@@ -441,18 +441,67 @@ export default function SubmitStoryPage() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-              How do we use AI in schools?
+              What's Actually Working (or Not) With AI in Your Classroom?
             </h1>
             <div className="text-lg md:text-xl text-cyan-50 space-y-4 drop-shadow-md">
               <p className="font-semibold text-cyan-200 text-xl md:text-2xl">
-                Your story matters.
+                Everyone has an opinion about AI in schools. We want yours.
               </p>
               <p>
-                Whether you're experimenting with AI tools, transforming your teaching practice,
-                or navigating challenges—we want to hear from you. Share your experience and help
-                shape the conversation about AI in education.
+                There's no shortage of{' '}
+                <a href="https://cdt.org/insights/report-teachers-hesitant-to-use-ai-due-to-lack-of-training-and-concerns-about-student-privacy/" className="underline hover:text-white transition-colors">reports</a>,{' '}
+                <a href="https://edudownloads.azureedge.net/msdownloads/Microsoft-Global-AI-in-Education-Report-2025.pdf" className="underline hover:text-white transition-colors">surveys</a>,{' '}
+                and <a href="https://wffeducation.org/resources/research-insights/the-ai-dividend-new-survey-shows-ai-is-helping-teachers-reclaim-valuable-time/" className="underline hover:text-white transition-colors">other research</a>{' '}
+                written about the use of AI in schools. But the best insights come from those actually in the classroom,
+                experimenting with tools like MagicSchool, Diffit, Gemini and ChatGPT in their classroom.
+              </p>
+              <p>
+                Artificial intelligence has enormous potential - but also carries huge risks to student privacy. How do you assign homework when students can
+                just plug it into their chatbot?
+                I am an education technologist and robotics coach. I started this podcast to better understand what works and what doesn't
+                with AI use in schools. And I'd like to hear from you. Come on the show and
+                share what's actually working (or not working) in your classroom.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* Call to Action - Invitation to Join */}
+      <section className="py-16 px-4 bg-gradient-to-r from-accent via-[#ea9726] to-accent-dark">
+        <div className="max-w-4xl mx-auto text-center text-white">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Come Share Your Story on the Show
+          </h2>
+          <div className="text-lg md:text-xl space-y-4 opacity-95 mb-8">
+            <p className="font-semibold">
+              Whether you're excited about AI tools or concerned about privacy and authenticity, we want to hear your perspective.
+            </p>
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-8 mb-6 border-2 border-white/30">
+            <p className="text-2xl font-bold mb-2">Thank You Gift</p>
+            <p className="text-xl">
+              Teachers who join us for an interview will receive a <span className="font-bold text-yellow-200">$50 gift card</span> to your favorite store as our thanks for sharing your time and expertise.
+            </p>
+          </div>
+          <p className="text-lg mb-8 opacity-90">
+            Ready to share? Fill out the form below to schedule your interview.
+          </p>
+          <div className="inline-block">
+            <svg
+              className="w-12 h-12 mx-auto animate-bounce text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
           </div>
         </div>
       </section>
