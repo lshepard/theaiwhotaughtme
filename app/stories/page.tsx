@@ -36,6 +36,52 @@ export default function SubmitStoryPage() {
   const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
   const [isSearchingSchools, setIsSearchingSchools] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
+  const [showRoleSuggestions, setShowRoleSuggestions] = useState(false);
+  const [allRoles, setAllRoles] = useState<string[]>([]);
+  const [gradesSuggestions, setGradesSuggestions] = useState<string[]>([]);
+  const [showGradesSuggestions, setShowGradesSuggestions] = useState(false);
+  const [allGrades, setAllGrades] = useState<string[]>([]);
+
+  // Load roles from CSV on mount
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        const response = await fetch('/roles.csv');
+        const text = await response.text();
+        // Parse CSV and remove BOM if present, filter empty lines
+        const roles = text
+          .replace(/^\uFEFF/, '') // Remove BOM
+          .split('\n')
+          .map(role => role.trim())
+          .filter(role => role.length > 0);
+        setAllRoles(roles);
+      } catch (error) {
+        console.error('Error loading roles:', error);
+      }
+    };
+    loadRoles();
+  }, []);
+
+  // Load grades from CSV on mount
+  useEffect(() => {
+    const loadGrades = async () => {
+      try {
+        const response = await fetch('/grades.csv');
+        const text = await response.text();
+        // Parse CSV and remove BOM if present, filter empty lines
+        const grades = text
+          .replace(/^\uFEFF/, '') // Remove BOM
+          .split('\n')
+          .map(grade => grade.trim())
+          .filter(grade => grade.length > 0);
+        setAllGrades(grades);
+      } catch (error) {
+        console.error('Error loading grades:', error);
+      }
+    };
+    loadGrades();
+  }, []);
 
   const handleStep1Next = async () => {
     setError('');
@@ -164,6 +210,56 @@ export default function SubmitStoryPage() {
     setSchool(suggestion.fullAddress);
     setShowSchoolSuggestions(false);
     setSchoolSuggestions([]);
+  };
+
+  const handleRoleChange = (value: string) => {
+    setRole(value);
+
+    // If empty, hide suggestions
+    if (!value.trim()) {
+      setRoleSuggestions([]);
+      setShowRoleSuggestions(false);
+      return;
+    }
+
+    // Filter roles that contain the search term (case-insensitive)
+    const filtered = allRoles
+      .filter(role => role.toLowerCase().includes(value.toLowerCase()))
+      .slice(0, 10); // Limit to 10 suggestions
+
+    setRoleSuggestions(filtered);
+    setShowRoleSuggestions(filtered.length > 0);
+  };
+
+  const handleRoleSelect = (selectedRole: string) => {
+    setRole(selectedRole);
+    setShowRoleSuggestions(false);
+    setRoleSuggestions([]);
+  };
+
+  const handleGradesChange = (value: string) => {
+    setGrades(value);
+
+    // If empty, hide suggestions
+    if (!value.trim()) {
+      setGradesSuggestions([]);
+      setShowGradesSuggestions(false);
+      return;
+    }
+
+    // Filter grades that contain the search term (case-insensitive)
+    const filtered = allGrades
+      .filter(grade => grade.toLowerCase().includes(value.toLowerCase()))
+      .slice(0, 10); // Limit to 10 suggestions
+
+    setGradesSuggestions(filtered);
+    setShowGradesSuggestions(filtered.length > 0);
+  };
+
+  const handleGradesSelect = (selectedGrade: string) => {
+    setGrades(selectedGrade);
+    setShowGradesSuggestions(false);
+    setGradesSuggestions([]);
   };
 
   const formatTime = (isoString: string) => {
@@ -459,7 +555,7 @@ export default function SubmitStoryPage() {
                     )}
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <label
                       htmlFor="role"
                       className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
@@ -469,21 +565,31 @@ export default function SubmitStoryPage() {
                     <input
                       type="text"
                       id="role"
-                      list="role-options"
                       className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
-                      placeholder="Select or type your role..."
+                      placeholder="e.g. Math Teacher, Special Education Teacher, Instructional Coach"
                       value={role}
-                      onChange={(e) => setRole(e.target.value)}
+                      onChange={(e) => handleRoleChange(e.target.value)}
+                      onBlur={() => setTimeout(() => setShowRoleSuggestions(false), 200)}
+                      onFocus={() => roleSuggestions.length > 0 && setShowRoleSuggestions(true)}
+                      autoComplete="off"
                     />
-                    <datalist id="role-options">
-                      <option value="Classroom Teacher" />
-                      <option value="Special Education Teacher" />
-                      <option value="Curriculum Advisor" />
-                      <option value="SECA" />
-                    </datalist>
+                    {showRoleSuggestions && roleSuggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {roleSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleRoleSelect(suggestion)}
+                            className="w-full px-4 py-3 text-left hover:bg-accent/10 transition-colors border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="font-semibold text-primary">{suggestion}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <label
                       htmlFor="grades"
                       className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
@@ -494,10 +600,27 @@ export default function SubmitStoryPage() {
                       type="text"
                       id="grades"
                       className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
-                      placeholder="e.g., 3rd-5th, High School, K-12"
+                      placeholder="e.g. K-5, Middle School, 9th-12th"
                       value={grades}
-                      onChange={(e) => setGrades(e.target.value)}
+                      onChange={(e) => handleGradesChange(e.target.value)}
+                      onBlur={() => setTimeout(() => setShowGradesSuggestions(false), 200)}
+                      onFocus={() => gradesSuggestions.length > 0 && setShowGradesSuggestions(true)}
+                      autoComplete="off"
                     />
+                    {showGradesSuggestions && gradesSuggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {gradesSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleGradesSelect(suggestion)}
+                            className="w-full px-4 py-3 text-left hover:bg-accent/10 transition-colors border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="font-semibold text-primary">{suggestion}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div>
