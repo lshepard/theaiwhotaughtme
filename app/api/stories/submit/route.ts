@@ -64,6 +64,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Send data to webhook if configured
+    const webhookUrl = process.env.WEBHOOK_URL;
+    if (webhookUrl) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: result.id,
+            name: name.trim(),
+            email: email.trim(),
+            school: school.trim(),
+            grades: grades?.trim() || null,
+            role: role?.trim() || null,
+            phone: phone?.trim() || null,
+            verificationLink: verificationLink.trim(),
+            aiUsage: aiUsage.trim(),
+            submittedAt: new Date().toISOString(),
+          }),
+        });
+        // Don't fail the submission if webhook fails
+      } catch (webhookError) {
+        console.error('Webhook error:', webhookError);
+        // Continue anyway - webhook failure shouldn't fail the submission
+      }
+    }
+
     return NextResponse.json({
       success: true,
       id: result.id,
