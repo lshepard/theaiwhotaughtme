@@ -198,26 +198,44 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-gray-200 flex gap-6 text-sm">
-                  {story.email && (
+                <div className="pt-4 border-t border-gray-200 space-y-2 text-sm">
+                  <div className="flex gap-6">
+                    {story.email && (
+                      <div>
+                        <span className="font-medium text-gray-700">Email:</span>{' '}
+                        <a
+                          href={`mailto:${story.email}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {story.email}
+                        </a>
+                      </div>
+                    )}
+                    {story.phone && (
+                      <div>
+                        <span className="font-medium text-gray-700">Phone:</span>{' '}
+                        <a
+                          href={`tel:${story.phone}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {story.phone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  {story.verification_link && (
                     <div>
-                      <span className="font-medium text-gray-700">Email:</span>{' '}
+                      <span className="font-medium text-gray-700">Verification:</span>{' '}
                       <a
-                        href={`mailto:${story.email}`}
-                        className="text-blue-600 hover:underline"
+                        href={story.verification_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline inline-flex items-center gap-1"
                       >
-                        {story.email}
-                      </a>
-                    </div>
-                  )}
-                  {story.phone && (
-                    <div>
-                      <span className="font-medium text-gray-700">Phone:</span>{' '}
-                      <a
-                        href={`tel:${story.phone}`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {story.phone}
+                        {story.verification_link}
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                       </a>
                     </div>
                   )}

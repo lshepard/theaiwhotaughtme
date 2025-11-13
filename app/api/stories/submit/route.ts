@@ -4,12 +4,12 @@ import { insertStory } from '@/lib/db';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, school, grades, role, phone, aiUsage } = body;
+    const { name, email, school, grades, role, phone, verificationLink, aiUsage } = body;
 
     // Validate required fields
-    if (!name?.trim() || !email?.trim() || !school?.trim() || !aiUsage?.trim()) {
+    if (!name?.trim() || !email?.trim() || !school?.trim() || !aiUsage?.trim() || !verificationLink?.trim()) {
       return NextResponse.json(
-        { error: 'Missing required fields: name, email, school, and AI usage are required.' },
+        { error: 'Missing required fields: name, email, school, verification link, and AI usage are required.' },
         { status: 400 }
       );
     }
@@ -19,6 +19,16 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
         { error: 'Please enter a valid email address.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate verification link is a valid URL
+    try {
+      new URL(verificationLink.trim());
+    } catch {
+      return NextResponse.json(
+        { error: 'Please enter a valid URL for the verification link.' },
         { status: 400 }
       );
     }
@@ -43,6 +53,7 @@ export async function POST(request: NextRequest) {
       school: school.trim(),
       grades: grades?.trim() || undefined,
       role: role?.trim() || undefined,
+      verificationLink: verificationLink.trim(),
     });
 
     if (!result.success) {

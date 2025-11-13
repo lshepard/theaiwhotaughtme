@@ -15,6 +15,7 @@ export interface Story {
   school: string | null;
   grades: string | null;
   role: string | null;
+  verification_link: string | null;
   created_at: string;
 }
 
@@ -26,6 +27,7 @@ export async function insertStory(data: {
   school?: string;
   grades?: string;
   role?: string;
+  verificationLink?: string;
 }) {
   try {
     const { data: result, error } = await supabase
@@ -39,6 +41,7 @@ export async function insertStory(data: {
           school: data.school || null,
           grades: data.grades || null,
           role: data.role || null,
+          verification_link: data.verificationLink || null,
         },
       ])
       .select('id')

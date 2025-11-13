@@ -18,6 +18,7 @@ export default function SubmitStoryPage() {
   const [role, setRole] = useState('');
   const [aiUsage, setAiUsage] = useState('');
   const [phone, setPhone] = useState('');
+  const [verificationLink, setVerificationLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submittedStoryId, setSubmittedStoryId] = useState<number | null>(null);
@@ -77,7 +78,7 @@ export default function SubmitStoryPage() {
     setError('');
 
     // Validate required fields
-    if (!name.trim() || !email.trim() || !school.trim() || !aiUsage.trim()) {
+    if (!name.trim() || !email.trim() || !school.trim() || !aiUsage.trim() || !verificationLink.trim()) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -86,6 +87,14 @@ export default function SubmitStoryPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       setError('Please enter a valid email address.');
+      return;
+    }
+
+    // Validate verification link is a valid URL
+    try {
+      new URL(verificationLink.trim());
+    } catch {
+      setError('Please enter a valid URL for the verification link.');
       return;
     }
 
@@ -113,6 +122,7 @@ export default function SubmitStoryPage() {
           grades,
           role,
           phone,
+          verificationLink,
           aiUsage,
         }),
       });
@@ -538,6 +548,27 @@ export default function SubmitStoryPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                     />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="verificationLink"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
+                    >
+                      School Profile or LinkedIn URL <span className="text-accent">*</span>
+                    </label>
+                    <input
+                      type="url"
+                      id="verificationLink"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
+                      placeholder="https://www.linkedin.com/in/yourprofile or school website link"
+                      value={verificationLink}
+                      onChange={(e) => setVerificationLink(e.target.value)}
+                      required
+                    />
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      We need this to verify your identity before scheduling an interview
+                    </p>
                   </div>
 
                   <div>
