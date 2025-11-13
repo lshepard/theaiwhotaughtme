@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
@@ -11,7 +11,7 @@ interface TimeSlot {
   invitees_remaining: number;
 }
 
-export default function SchedulePage() {
+function SchedulePageContent() {
   const searchParams = useSearchParams();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -485,6 +485,21 @@ export default function SchedulePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function SchedulePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white dark:bg-[#0d1f26]">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SchedulePageContent />
+    </Suspense>
   );
 }
 
