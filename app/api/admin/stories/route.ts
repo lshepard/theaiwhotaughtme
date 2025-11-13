@@ -22,6 +22,7 @@ function isAuthenticated(request: NextRequest): boolean {
 export async function GET(request: NextRequest) {
   // Check authentication
   if (!isAuthenticated(request)) {
+    console.log('Authentication failed');
     return new NextResponse('Unauthorized', {
       status: 401,
       headers: {
@@ -30,12 +31,17 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  console.log('Authenticated successfully, fetching stories...');
+
   try {
     const result = await getAllStories();
 
     if (!result.success) {
-      throw new Error('Failed to fetch stories');
+      console.error('getAllStories returned unsuccessful result:', result.error);
+      throw new Error(result.error instanceof Error ? result.error.message : 'Failed to fetch stories from database');
     }
+
+    console.log(`Successfully fetched ${result.stories?.length || 0} stories`);
 
     return NextResponse.json({
       success: true,
@@ -43,8 +49,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching stories:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch stories';
     return NextResponse.json(
-      { error: 'Failed to fetch stories' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

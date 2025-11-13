@@ -17,11 +17,19 @@ export default function AdminPage() {
       setError('');
 
       const credentials = btoa(`${user}:${pass}`);
+
+      // Add timeout to prevent hanging indefinitely
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch('/api/admin/stories', {
         headers: {
           Authorization: `Basic ${credentials}`,
         },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.status === 401) {
         setError('Invalid username or password');
@@ -30,14 +38,28 @@ export default function AdminPage() {
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch stories');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
       }
 
       const data = await response.json();
       setStories(data.stories);
       setIsAuthenticated(true);
     } catch (err) {
-      setError('Failed to fetch stories. Please try again.');
+      console.error('Login error:', err);
+
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          setError('Request timed out. Please check if the server is running and try again.');
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+          setError('Network error: Unable to reach the server. Is the development server running?');
+        } else {
+          setError(`Error: ${err.message}`);
+        }
+      } else {
+        setError('Failed to fetch stories. Please try again.');
+      }
+
       setIsAuthenticated(false);
     } finally {
       setLoading(false);

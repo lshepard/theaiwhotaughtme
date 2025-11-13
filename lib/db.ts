@@ -14,6 +14,7 @@ export interface Story {
   phone: string | null;
   school: string | null;
   grades: string | null;
+  role: string | null;
   created_at: string;
 }
 
@@ -24,6 +25,7 @@ export async function insertStory(data: {
   phone?: string;
   school?: string;
   grades?: string;
+  role?: string;
 }) {
   try {
     const { data: result, error } = await supabase
@@ -36,6 +38,7 @@ export async function insertStory(data: {
           phone: data.phone || null,
           school: data.school || null,
           grades: data.grades || null,
+          role: data.role || null,
         },
       ])
       .select('id')
