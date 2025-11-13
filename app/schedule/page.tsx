@@ -21,13 +21,13 @@ function SchedulePageContent() {
   const [grades, setGrades] = useState('');
   const [aiUsage, setAiUsage] = useState('');
 
-  // Fetch story data if storyId is provided
+  // Fetch story data if id is provided
   useEffect(() => {
-    const storyId = searchParams?.get('storyId');
-    if (storyId) {
+    const id = searchParams?.get('id');
+    if (id) {
       const fetchStory = async () => {
         try {
-          const response = await fetch(`/api/stories/${storyId}`);
+          const response = await fetch(`/api/stories/${id}`);
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.story) {
@@ -47,7 +47,7 @@ function SchedulePageContent() {
       };
       fetchStory();
     } else if (searchParams) {
-      // Fallback to query params if no storyId
+      // Fallback to query params if no id
       setName(searchParams.get('name') || '');
       setEmail(searchParams.get('email') || '');
       setPhone(searchParams.get('phone') || '');
@@ -315,6 +315,53 @@ function SchedulePageContent() {
               Choose a time that works best for you
             </p>
           </div>
+
+          {/* User Information Display */}
+          {searchParams?.get('id') && (name || email || school || role || grades) && (
+            <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
+              <h2 className="text-xl font-bold text-primary dark:text-cyan-100 mb-6 text-center">
+                Your Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {name && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
+                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Name</p>
+                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{name}</p>
+                  </div>
+                )}
+                {email && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
+                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Email</p>
+                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{email}</p>
+                  </div>
+                )}
+                {school && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
+                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">School</p>
+                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{school}</p>
+                  </div>
+                )}
+                {role && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
+                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Role</p>
+                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{role}</p>
+                  </div>
+                )}
+                {grades && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
+                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Grades</p>
+                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{grades}</p>
+                  </div>
+                )}
+                {phone && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
+                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Phone</p>
+                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{phone}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Contact Info Form (if not provided via query params) */}
           {(!name || !email) && (
