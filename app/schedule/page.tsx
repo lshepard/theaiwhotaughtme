@@ -20,11 +20,13 @@ function SchedulePageContent() {
   const [role, setRole] = useState('');
   const [grades, setGrades] = useState('');
   const [aiUsage, setAiUsage] = useState('');
+  const [isLoadingStory, setIsLoadingStory] = useState(false);
 
   // Fetch story data if id is provided
   useEffect(() => {
     const id = searchParams?.get('id');
     if (id) {
+      setIsLoadingStory(true);
       const fetchStory = async () => {
         try {
           const response = await fetch(`/api/stories/${id}`);
@@ -43,6 +45,8 @@ function SchedulePageContent() {
           }
         } catch (error) {
           console.error('Error fetching story:', error);
+        } finally {
+          setIsLoadingStory(false);
         }
       };
       fetchStory();
@@ -316,8 +320,18 @@ function SchedulePageContent() {
             </p>
           </div>
 
+          {/* Loading State for Story Data */}
+          {isLoadingStory && (
+            <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
+                <p className="text-gray-500 dark:text-gray-400">Loading your information...</p>
+              </div>
+            </div>
+          )}
+
           {/* User Information Display */}
-          {searchParams?.get('id') && (name || email || school || role || grades) && (
+          {!isLoadingStory && searchParams?.get('id') && (name || email || school || role || grades) && (
             <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
               <h2 className="text-xl font-bold text-primary dark:text-cyan-100 mb-6 text-center">
                 Your Information
@@ -364,7 +378,7 @@ function SchedulePageContent() {
           )}
 
           {/* Contact Info Form (if not provided via query params) */}
-          {(!name || !email) && (
+          {!isLoadingStory && (!name || !email) && (
             <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
               <h2 className="text-xl font-bold text-primary dark:text-cyan-100 mb-4">
                 Contact Information

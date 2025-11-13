@@ -256,7 +256,7 @@ export default function SubmitStoryPage() {
             </p>
             <div className="mb-8">
               <Link
-                href={submittedStoryId ? `/schedule?storyId=${submittedStoryId}` : '/schedule'}
+                href={submittedStoryId ? `/schedule?id=${submittedStoryId}` : '/schedule'}
                 className="inline-block bg-gradient-to-r from-accent to-accent-dark text-white px-8 py-3 rounded-lg font-semibold hover:from-accent-dark hover:to-accent-darker transition-all shadow-lg mr-4"
               >
                 Schedule Interview
