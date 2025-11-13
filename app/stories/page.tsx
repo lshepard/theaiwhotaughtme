@@ -20,6 +20,7 @@ export default function SubmitStoryPage() {
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submittedStoryId, setSubmittedStoryId] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [schoolSuggestions, setSchoolSuggestions] = useState<SchoolSuggestion[]>([]);
   const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
@@ -121,6 +122,8 @@ export default function SubmitStoryPage() {
         throw new Error(errorData.error || 'Failed to submit your story');
       }
 
+      const responseData = await response.json();
+      setSubmittedStoryId(responseData.id || null);
       setSubmitSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Failed to submit your story. Please try again.');
@@ -253,7 +256,7 @@ export default function SubmitStoryPage() {
             </p>
             <div className="mb-8">
               <Link
-                href="/schedule"
+                href={submittedStoryId ? `/schedule?storyId=${submittedStoryId}` : '/schedule'}
                 className="inline-block bg-gradient-to-r from-accent to-accent-dark text-white px-8 py-3 rounded-lg font-semibold hover:from-accent-dark hover:to-accent-darker transition-all shadow-lg mr-4"
               >
                 Schedule Interview

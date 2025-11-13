@@ -21,9 +21,33 @@ function SchedulePageContent() {
   const [grades, setGrades] = useState('');
   const [aiUsage, setAiUsage] = useState('');
 
-  // Initialize from query params if available
+  // Fetch story data if storyId is provided
   useEffect(() => {
-    if (searchParams) {
+    const storyId = searchParams?.get('storyId');
+    if (storyId) {
+      const fetchStory = async () => {
+        try {
+          const response = await fetch(`/api/stories/${storyId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.story) {
+              const story = data.story;
+              setName(story.name || '');
+              setEmail(story.email || '');
+              setPhone(story.phone || '');
+              setSchool(story.school || '');
+              setRole(story.role || '');
+              setGrades(story.grades || '');
+              setAiUsage(story.story || '');
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching story:', error);
+        }
+      };
+      fetchStory();
+    } else if (searchParams) {
+      // Fallback to query params if no storyId
       setName(searchParams.get('name') || '');
       setEmail(searchParams.get('email') || '');
       setPhone(searchParams.get('phone') || '');

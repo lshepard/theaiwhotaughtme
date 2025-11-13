@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Mark this route as dynamic since it uses search params
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   try {

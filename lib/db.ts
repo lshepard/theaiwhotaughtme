@@ -72,3 +72,22 @@ export async function getAllStories() {
     return { success: false, error };
   }
 }
+
+export async function getStoryById(id: number) {
+  try {
+    const { data: story, error } = await supabase
+      .from('stories')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true, story: story as Story };
+  } catch (error) {
+    console.error('Error fetching story:', error);
+    return { success: false, error };
+  }
+}
