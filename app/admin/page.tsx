@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import Cookies from 'js-cookie';
 import type { Story } from '@/lib/db';
 
 export default function AdminPage() {
@@ -10,6 +11,57 @@ export default function AdminPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const fetchStoriesWithCredentials = useCallback(async (credentials: string) => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const response = await fetch('/api/admin/stories', {
+        headers: {
+          Authorization: `Basic ${credentials}`,
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 401) {
+        // Invalid credentials, remove cookie
+        Cookies.remove('admin_auth');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setStories(data.stories);
+      setIsAuthenticated(true);
+    } catch (err) {
+      console.error('Auto-login error:', err);
+      // Don't show error on auto-login failure, just stay logged out
+      Cookies.remove('admin_auth');
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Check for existing auth cookie on page load
+  useEffect(() => {
+    const authCookie = Cookies.get('admin_auth');
+    if (authCookie) {
+      // Auto-authenticate using stored credentials
+      fetchStoriesWithCredentials(authCookie);
+    }
+  }, [fetchStoriesWithCredentials]);
 
   const fetchStories = async (user: string, pass: string) => {
     try {
@@ -33,6 +85,7 @@ export default function AdminPage() {
 
       if (response.status === 401) {
         setError('Invalid username or password');
+        Cookies.remove('admin_auth');
         setIsAuthenticated(false);
         return;
       }
@@ -45,6 +98,9 @@ export default function AdminPage() {
       const data = await response.json();
       setStories(data.stories);
       setIsAuthenticated(true);
+
+      // Store credentials in cookie for 7 days
+      Cookies.set('admin_auth', credentials, { expires: 7, secure: true, sameSite: 'strict' });
     } catch (err) {
       console.error('Login error:', err);
 
@@ -76,6 +132,18 @@ export default function AdminPage() {
   };
 
   if (!isAuthenticated) {
+    // Show loading spinner during initial auth check
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <p className="mt-4 text-gray-600">Checking authentication...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
@@ -140,6 +208,7 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold text-gray-900">Story Submissions</h1>
           <button
             onClick={() => {
+              Cookies.remove('admin_auth');
               setIsAuthenticated(false);
               setUsername('');
               setPassword('');
