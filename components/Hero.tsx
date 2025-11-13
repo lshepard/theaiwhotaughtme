@@ -27,7 +27,7 @@ export default function Hero() {
               Can a robot really teach?
             </p>
             <p>
-              <strong>The AI Who Taught Me</strong> is a weekly podcast that explores how artificial intelligence
+              <strong>The AI Who Taught Me</strong> is a podcast that explores how artificial intelligence
               is changing classrooms—sometimes for better, sometimes not. Hosted by Luke Shepard and his AI
               co-host Emerald, each episode investigates the real-world impact of AI on how we learn.
             </p>

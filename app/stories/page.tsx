@@ -441,26 +441,29 @@ export default function SubmitStoryPage() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
-              What's Actually Working (or Not) With AI in Your Classroom?
+              How Are You Using AI in Your Classroom?
             </h1>
             <div className="text-lg md:text-xl text-cyan-50 space-y-4 drop-shadow-md">
               <p className="font-semibold text-cyan-200 text-xl md:text-2xl">
                 Everyone has an opinion about AI in schools. We want yours.
               </p>
               <p>
-                There's no shortage of{' '}
+                I'm Luke Shepard, an engineer, edtech enthusiast, and robotics coach. I run this podcast
+                to better understand what works and what doesn't with AI use in schools. In the last year,
+                we have covered research and news on what works, dug into AI tools like MagicSchool, Brisk,
+                and SparkSpace, and gone deep into the offerings of the major LLM providers.
+                </p>
+                <p>
+                 There's no shortage of{' '}
                 <a href="https://cdt.org/insights/hand-in-hand-schools-embrace-of-ai-connected-to-increased-risks-to-students/" className="underline hover:text-white transition-colors">reports</a>,{' '}
                 <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/bade/documents/products-and-services/en-us/education/2025-Microsoft-AI-in-Education-Report.pdf" className="underline hover:text-white transition-colors">surveys</a>,{' '}
                 and <a href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1647573/full" className="underline hover:text-white transition-colors">papers</a>{' '}
-                written about the use of AI in schools. But the best insights come from those actually in the classroom,
-                experimenting with tools like MagicSchool, Diffit, Gemini and ChatGPT in their classroom.
+                written about the use of AI in schools. But I want to hear from <b>you</b>.
               </p>
               <p>
-                Artificial intelligence has enormous potential - but also carries huge risks to student privacy. How do you assign homework when students can
-                just plug it into their chatbot?
-                I am an education technologist and robotics coach. I started this podcast to better understand what works and what doesn't
-                with AI use in schools. And I'd like to hear from you. Come on the show and
-                share what's actually working (or not working) in your classroom.
+                If you are a K-12 teacher, then I want to hear from <b>you!</b>
+                How are you using AI in your classroom? What have you tried? What’s working, what’s not working with AI in your classroom? What are you excited about? What worries you? 
+                Come on the show and share your story.
               </p>
             </div>
           </div>
