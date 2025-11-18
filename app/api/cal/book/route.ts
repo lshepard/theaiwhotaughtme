@@ -17,12 +17,11 @@ export async function POST(request: NextRequest) {
     console.log('   aiUsage:', aiUsage);
 
     // Validate required fields
-    if (!start_time || !name || !email || !aiUsage) {
+    if (!start_time || !name || !email) {
       console.error('❌ Missing required fields:');
       console.error('   start_time:', !!start_time);
       console.error('   name:', !!name);
       console.error('   email:', !!email);
-      console.error('   aiUsage:', !!aiUsage);
       return NextResponse.json(
         { error: 'Missing required booking information' },
         { status: 400 }
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest) {
         school: school || 'N/A',
         role: role || 'N/A',
         grades: grades || 'N/A',
-        aiUsage: aiUsage,
+        aiUsage: aiUsage || 'N/A',
       },
     };
 
