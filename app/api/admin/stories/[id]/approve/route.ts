@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStoryById } from '@/lib/db';
+import { getStoryById, updateStoryStatus } from '@/lib/db';
 
 function isAuthenticated(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
@@ -99,6 +99,12 @@ export async function POST(
     }
 
     console.log('✅ Approval webhook sent successfully');
+
+    // Update story status to 'sent_for_interview'
+    const updateResult = await updateStoryStatus(id, 'sent_for_interview');
+    if (!updateResult.success) {
+      console.error('⚠️ Failed to update story status, but approval was sent');
+    }
 
     return NextResponse.json({
       success: true,

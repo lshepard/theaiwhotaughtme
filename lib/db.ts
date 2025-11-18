@@ -6,6 +6,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+export type StoryStatus = 'initial' | 'sent_for_interview' | 'scheduled' | 'completed';
+
 export interface Story {
   id: number;
   story: string;
@@ -16,6 +18,7 @@ export interface Story {
   grades: string | null;
   role: string | null;
   verification_link: string | null;
+  status: StoryStatus;
   created_at: string;
 }
 
@@ -109,6 +112,24 @@ export async function deleteStory(id: number) {
     return { success: true };
   } catch (error) {
     console.error('Error deleting story:', error);
+    return { success: false, error };
+  }
+}
+
+export async function updateStoryStatus(id: number, status: StoryStatus) {
+  try {
+    const { error } = await supabase
+      .from('stories')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating story status:', error);
     return { success: false, error };
   }
 }

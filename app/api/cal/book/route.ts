@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { start_time, end_time, name, email, phone, school, grades, role, aiUsage } = body;
+    const { start_time, end_time, name, email, phone, school, grades, role, aiUsage, storyId } = body;
 
     console.log('📅 Booking request received:');
     console.log('   start_time:', start_time);
@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
       username: calUsername,
       attendee: attendeeData,
       metadata: {
+        storyId: storyId || null,
         school: school || 'N/A',
         role: role || 'N/A',
         grades: grades || 'N/A',

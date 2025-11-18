@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import type { Story } from '@/lib/db';
+import type { Story, StoryStatus } from '@/lib/db';
 
 export default function AdminPage() {
   const [stories, setStories] = useState<Story[]>([]);
@@ -14,6 +14,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StoryStatus | 'all' | 'needs_action'>('needs_action');
 
   const fetchStoriesWithCredentials = useCallback(async (credentials: string) => {
     try {
@@ -132,6 +133,90 @@ export default function AdminPage() {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
+  };
+
+  const getStatusBadgeColor = (status: StoryStatus) => {
+    switch (status) {
+      case 'initial':
+        return 'bg-gray-100 text-gray-800';
+      case 'sent_for_interview':
+        return 'bg-blue-100 text-blue-800';
+      case 'scheduled':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: StoryStatus) => {
+    switch (status) {
+      case 'initial':
+        return 'Initial';
+      case 'sent_for_interview':
+        return 'Sent for Interview';
+      case 'scheduled':
+        return 'Scheduled';
+      case 'completed':
+        return 'Completed';
+      default:
+        return status;
+    }
+  };
+
+  const filteredStories = stories.filter((story) => {
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'needs_action') {
+      return story.status !== 'completed';
+    }
+    return story.status === statusFilter;
+  });
+
+  const handleMarkAsCompleted = async (storyId: number) => {
+    if (!confirm('Mark this story as completed?')) {
+      return;
+    }
+
+    try {
+      const authCookie = Cookies.get('admin_auth');
+      if (!authCookie) {
+        setError('Not authenticated');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      const response = await fetch(`/api/admin/stories/${storyId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Basic ${authCookie}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'completed' }),
+      });
+
+      if (response.status === 401) {
+        setError('Session expired. Please login again.');
+        Cookies.remove('admin_auth');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update story status');
+      }
+
+      // Update the story in local state
+      setStories(stories.map(story =>
+        story.id === storyId ? { ...story, status: 'completed' as StoryStatus } : story
+      ));
+      setSuccessMessage('Story marked as completed');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error('Error updating story status:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update story status');
+    }
   };
 
   const handleDelete = async (storyId: number) => {
@@ -312,6 +397,69 @@ export default function AdminPage() {
           </button>
         </div>
 
+        <div className="mb-6 flex flex-wrap gap-2">
+          <button
+            onClick={() => setStatusFilter('needs_action')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              statusFilter === 'needs_action'
+                ? 'bg-purple-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Needs Action
+          </button>
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              statusFilter === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setStatusFilter('initial')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              statusFilter === 'initial'
+                ? 'bg-gray-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Initial
+          </button>
+          <button
+            onClick={() => setStatusFilter('sent_for_interview')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              statusFilter === 'sent_for_interview'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Sent for Interview
+          </button>
+          <button
+            onClick={() => setStatusFilter('scheduled')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              statusFilter === 'scheduled'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Scheduled
+          </button>
+          <button
+            onClick={() => setStatusFilter('completed')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              statusFilter === 'completed'
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Completed
+          </button>
+        </div>
+
         {successMessage && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-700">{successMessage}</p>
@@ -328,22 +476,29 @@ export default function AdminPage() {
           <div className="text-center py-12">
             <p className="text-gray-600">Loading stories...</p>
           </div>
-        ) : stories.length === 0 ? (
+        ) : filteredStories.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">No stories submitted yet.</p>
+            <p className="text-gray-600">
+              {stories.length === 0 ? 'No stories submitted yet.' : 'No stories match the selected filter.'}
+            </p>
           </div>
         ) : (
           <div className="space-y-6">
-            {stories.map((story) => (
+            {filteredStories.map((story) => (
               <div
                 key={story.id}
                 className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {story.name}
-                    </h3>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {story.name}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(story.status)}`}>
+                        {getStatusLabel(story.status)}
+                      </span>
+                    </div>
                     <div className="mt-1 space-y-1">
                       {story.school && (
                         <p className="text-sm text-gray-600">
@@ -441,6 +596,17 @@ export default function AdminPage() {
                       </svg>
                       Schedule Interview
                     </Link>
+                    {story.status !== 'completed' && (
+                      <button
+                        onClick={() => handleMarkAsCompleted(story.id)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Mark as Completed
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(story.id)}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"

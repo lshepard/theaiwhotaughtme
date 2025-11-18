@@ -129,6 +129,7 @@ function SchedulePageContent() {
     setError('');
 
     try {
+      const storyId = searchParams?.get('id');
       const response = await fetch('/api/cal/book', {
         method: 'POST',
         headers: {
@@ -144,6 +145,7 @@ function SchedulePageContent() {
           role,
           grades,
           aiUsage,
+          storyId,
         }),
       });
 
