@@ -67,30 +67,48 @@ export async function POST(request: NextRequest) {
     // Send data to webhook if configured
     const webhookUrl = process.env.FORM_SUBMIT_WEBHOOK_URL;
     if (webhookUrl) {
+      console.log('📤 Sending to form submission webhook...');
+      console.log('   Webhook URL:', webhookUrl);
+      console.log('   Story ID:', result.id);
+      console.log('   Public ID:', result.publicId);
       try {
-        await fetch(webhookUrl, {
+        const webhookPayload = {
+          id: result.id,
+          publicId: result.publicId,
+          name: name.trim(),
+          email: email.trim(),
+          school: school.trim(),
+          grades: grades?.trim() || null,
+          role: role?.trim() || null,
+          phone: phone?.trim() || null,
+          verificationLink: verificationLink.trim(),
+          aiUsage: aiUsage.trim(),
+          submittedAt: new Date().toISOString(),
+        };
+
+        console.log('   Payload:', JSON.stringify(webhookPayload, null, 2));
+
+        const webhookResponse = await fetch(webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            id: result.id,
-            name: name.trim(),
-            email: email.trim(),
-            school: school.trim(),
-            grades: grades?.trim() || null,
-            role: role?.trim() || null,
-            phone: phone?.trim() || null,
-            verificationLink: verificationLink.trim(),
-            aiUsage: aiUsage.trim(),
-            submittedAt: new Date().toISOString(),
-          }),
+          body: JSON.stringify(webhookPayload),
         });
+
+        if (!webhookResponse.ok) {
+          const errorText = await webhookResponse.text();
+          console.error('❌ Webhook returned error:', webhookResponse.status, errorText);
+        } else {
+          console.log('✅ Webhook sent successfully');
+        }
         // Don't fail the submission if webhook fails
       } catch (webhookError) {
-        console.error('Webhook error:', webhookError);
+        console.error('❌ Webhook error:', webhookError);
         // Continue anyway - webhook failure shouldn't fail the submission
       }
+    } else {
+      console.log('⚠️  No FORM_SUBMIT_WEBHOOK_URL configured - skipping webhook');
     }
 
     return NextResponse.json({

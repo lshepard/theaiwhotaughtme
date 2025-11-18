@@ -56,7 +56,7 @@ export async function POST(
     const protocol = request.headers.get('x-forwarded-proto') || 'http';
     const host = request.headers.get('host') || 'localhost:3000';
     const baseUrl = `${protocol}://${host}`;
-    const scheduleUrl = `${baseUrl}/schedule?id=${story.id}`;
+    const scheduleUrl = `${baseUrl}/schedule?id=${story.public_id}`;
 
     // Send data to approval webhook if configured
     const webhookUrl = process.env.APPROVE_TEACHER_WEBHOOK_URL;
@@ -79,6 +79,7 @@ export async function POST(
       },
       body: JSON.stringify({
         id: story.id,
+        publicId: story.public_id,
         name: story.name,
         email: story.email,
         school: story.school,

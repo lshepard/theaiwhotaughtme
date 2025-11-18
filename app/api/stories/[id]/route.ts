@@ -10,16 +10,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id, 10);
-
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid story ID' },
-        { status: 400 }
-      );
-    }
-
-    const result = await getStoryById(id);
+    // Accept either numeric ID or public_id (alphanumeric code)
+    const result = await getStoryById(params.id);
 
     if (!result.success) {
       return NextResponse.json(

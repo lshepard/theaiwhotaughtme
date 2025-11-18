@@ -8,8 +8,46 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export type StoryStatus = 'initial' | 'sent_for_interview' | 'scheduled' | 'completed';
 
+// Generate a random 6-character alphanumeric code
+function generatePublicId(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+// Generate a unique public ID by checking against existing ones
+async function generateUniquePublicId(): Promise<string> {
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  while (attempts < maxAttempts) {
+    const publicId = generatePublicId();
+
+    // Check if it exists
+    const { data, error } = await supabase
+      .from('stories')
+      .select('id')
+      .eq('public_id', publicId)
+      .single();
+
+    // If no match found, this ID is unique
+    if (error && error.code === 'PGRST116') {
+      return publicId;
+    }
+
+    attempts++;
+  }
+
+  // Fallback to longer ID if we have collisions
+  return generatePublicId() + Math.random().toString(36).substring(2, 4);
+}
+
 export interface Story {
   id: number;
+  public_id: string;
   story: string;
   name: string;
   email: string | null;
@@ -33,10 +71,14 @@ export async function insertStory(data: {
   verificationLink?: string;
 }) {
   try {
+    // Generate unique public ID
+    const publicId = await generateUniquePublicId();
+
     const { data: result, error } = await supabase
       .from('stories')
       .insert([
         {
+          public_id: publicId,
           story: data.story,
           name: data.name,
           email: data.email || null,
@@ -47,14 +89,14 @@ export async function insertStory(data: {
           verification_link: data.verificationLink || null,
         },
       ])
-      .select('id')
+      .select('id, public_id')
       .single();
 
     if (error) {
       throw error;
     }
 
-    return { success: true, id: result.id };
+    return { success: true, id: result.id, publicId: result.public_id };
   } catch (error) {
     console.error('Error inserting story:', error);
     return { success: false, error };
@@ -79,13 +121,18 @@ export async function getAllStories() {
   }
 }
 
-export async function getStoryById(id: number) {
+export async function getStoryById(id: number | string) {
   try {
-    const { data: story, error } = await supabase
+    // If it's a number or numeric string, use id. Otherwise use public_id
+    const isNumericId = typeof id === 'number' || /^\d+$/.test(id);
+
+    const query = supabase
       .from('stories')
-      .select('*')
-      .eq('id', id)
-      .single();
+      .select('*');
+
+    const { data: story, error } = isNumericId
+      ? await query.eq('id', typeof id === 'string' ? parseInt(id, 10) : id).single()
+      : await query.eq('public_id', id).single();
 
     if (error) {
       throw error;

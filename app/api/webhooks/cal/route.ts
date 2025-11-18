@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateStoryStatus } from '@/lib/db';
+import { updateStoryStatus, getStoryById } from '@/lib/db';
 import crypto from 'crypto';
 
 // Verify the webhook signature from Cal.com
@@ -62,15 +62,26 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      console.log('   Story ID:', storyId);
+      console.log('   Story ID/Code:', storyId);
       console.log('   Booking ID:', body.payload?.id);
       console.log('   Attendee:', body.payload?.attendees?.[0]?.name);
 
-      // Update story status to 'scheduled'
-      const result = await updateStoryStatus(parseInt(storyId, 10), 'scheduled');
+      // Get the story first (handles both numeric ID and public_id)
+      const storyResult = await getStoryById(storyId);
 
-      if (!result.success) {
-        console.error('❌ Failed to update story status:', result.error);
+      if (!storyResult.success || !storyResult.story) {
+        console.error('❌ Story not found:', storyId);
+        return NextResponse.json(
+          { error: 'Story not found' },
+          { status: 404 }
+        );
+      }
+
+      // Update story status to 'scheduled' using numeric ID
+      const updateResult = await updateStoryStatus(storyResult.story.id, 'scheduled');
+
+      if (!updateResult.success) {
+        console.error('❌ Failed to update story status:', updateResult.error);
         return NextResponse.json(
           { error: 'Failed to update story status' },
           { status: 500 }

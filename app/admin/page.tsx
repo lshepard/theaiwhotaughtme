@@ -296,6 +296,12 @@ export default function AdminPage() {
       }
 
       const data = await response.json();
+
+      // Update the story status in local state
+      setStories(stories.map(story =>
+        story.id === storyId ? { ...story, status: 'sent_for_interview' as StoryStatus } : story
+      ));
+
       setSuccessMessage(`Approval email sent successfully to story #${storyId}`);
 
       // Clear success message after 5 seconds
@@ -588,7 +594,7 @@ export default function AdminPage() {
                       )}
                     </button>
                     <Link
-                      href={`/schedule?id=${story.id}`}
+                      href={`/schedule?id=${story.public_id}`}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
