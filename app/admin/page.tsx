@@ -12,6 +12,8 @@ export default function AdminPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [approvingId, setApprovingId] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const fetchStoriesWithCredentials = useCallback(async (credentials: string) => {
     try {
@@ -172,6 +174,55 @@ export default function AdminPage() {
     }
   };
 
+  const handleApprove = async (storyId: number) => {
+    if (!confirm('Send approval email to this teacher?')) {
+      return;
+    }
+
+    setApprovingId(storyId);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const authCookie = Cookies.get('admin_auth');
+      if (!authCookie) {
+        setError('Not authenticated');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      const response = await fetch(`/api/admin/stories/${storyId}/approve`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${authCookie}`,
+        },
+      });
+
+      if (response.status === 401) {
+        setError('Session expired. Please login again.');
+        Cookies.remove('admin_auth');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to send approval');
+      }
+
+      const data = await response.json();
+      setSuccessMessage(`Approval email sent successfully to story #${storyId}`);
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (err) {
+      console.error('Error approving story:', err);
+      setError(err instanceof Error ? err.message : 'Failed to approve story');
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
   if (!isAuthenticated) {
     // Show loading spinner during initial auth check
     if (loading) {
@@ -261,6 +312,18 @@ export default function AdminPage() {
           </button>
         </div>
 
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-700">{successMessage}</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-12">
             <p className="text-gray-600">Loading stories...</p>
@@ -349,7 +412,26 @@ export default function AdminPage() {
                       </a>
                     </div>
                   )}
-                  <div className="pt-2 flex gap-3">
+                  <div className="pt-2 flex flex-wrap gap-3">
+                    <button
+                      onClick={() => handleApprove(story.id)}
+                      disabled={approvingId === story.id}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {approvingId === story.id ? (
+                        <>
+                          <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Approve & Email
+                        </>
+                      )}
+                    </button>
                     <Link
                       href={`/schedule?id=${story.id}`}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"

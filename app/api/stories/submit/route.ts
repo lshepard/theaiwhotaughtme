@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send data to webhook if configured
-    const webhookUrl = process.env.WEBHOOK_URL;
+    const webhookUrl = process.env.FORM_SUBMIT_WEBHOOK_URL;
     if (webhookUrl) {
       try {
         await fetch(webhookUrl, {
