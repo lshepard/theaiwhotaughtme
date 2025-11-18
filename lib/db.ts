@@ -94,3 +94,21 @@ export async function getStoryById(id: number) {
     return { success: false, error };
   }
 }
+
+export async function deleteStory(id: number) {
+  try {
+    const { error } = await supabase
+      .from('stories')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    return { success: false, error };
+  }
+}

@@ -32,8 +32,18 @@ function SchedulePageContent() {
           const response = await fetch(`/api/stories/${id}`);
           if (response.ok) {
             const data = await response.json();
+            console.log('Fetched story data:', data);
             if (data.success && data.story) {
               const story = data.story;
+              console.log('Setting form fields:', {
+                name: story.name,
+                email: story.email,
+                phone: story.phone,
+                school: story.school,
+                role: story.role,
+                grades: story.grades,
+                aiUsage: story.story
+              });
               setName(story.name || '');
               setEmail(story.email || '');
               setPhone(story.phone || '');
@@ -41,7 +51,11 @@ function SchedulePageContent() {
               setRole(story.role || '');
               setGrades(story.grades || '');
               setAiUsage(story.story || '');
+            } else {
+              console.error('Invalid response structure:', data);
             }
+          } else {
+            console.error('Failed to fetch story:', response.status, await response.text());
           }
         } catch (error) {
           console.error('Error fetching story:', error);
@@ -320,123 +334,73 @@ function SchedulePageContent() {
             </p>
           </div>
 
-          {/* Loading State for Story Data */}
-          {isLoadingStory && (
-            <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
+          {/* Contact Info Form - Always visible, pre-filled if data provided */}
+          <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
+            {isLoadingStory ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-4"></div>
                 <p className="text-gray-500 dark:text-gray-400">Loading your information...</p>
               </div>
-            </div>
-          )}
-
-          {/* User Information Display */}
-          {!isLoadingStory && searchParams?.get('id') && (name || email || school || role || grades) && (
-            <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
-              <h2 className="text-xl font-bold text-primary dark:text-cyan-100 mb-6 text-center">
-                Your Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {name && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
-                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Name</p>
-                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{name}</p>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-primary dark:text-cyan-100 mb-4">
+                  Contact Information
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
+                    >
+                      Name <span className="text-accent">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
+                      placeholder="Your full name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
                   </div>
-                )}
-                {email && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
-                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Email</p>
-                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{email}</p>
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
+                    >
+                      Email <span className="text-accent">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
+                      placeholder="your.email@school.edu"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
                   </div>
-                )}
-                {school && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
-                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">School</p>
-                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{school}</p>
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
+                    >
+                      Phone (Optional)
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
+                      placeholder="555-123-4567"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
                   </div>
-                )}
-                {role && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
-                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Role</p>
-                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{role}</p>
-                  </div>
-                )}
-                {grades && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
-                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Grades</p>
-                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{grades}</p>
-                  </div>
-                )}
-                {phone && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-[#1a4a5a]/30 dark:to-[#0d1f26]/50 p-4 rounded-lg border-2 border-gray-200 dark:border-cyan-800/30">
-                    <p className="text-sm font-medium text-gray-600 dark:text-cyan-300 mb-1">Phone</p>
-                    <p className="text-lg font-semibold text-primary dark:text-cyan-100">{phone}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Contact Info Form (if not provided via query params) */}
-          {!isLoadingStory && (!name || !email) && (
-            <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8 mb-8">
-              <h2 className="text-xl font-bold text-primary dark:text-cyan-100 mb-4">
-                Contact Information
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
-                  >
-                    Name <span className="text-accent">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
-                    placeholder="Your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
                 </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
-                  >
-                    Email <span className="text-accent">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
-                    placeholder="your.email@school.edu"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-semibold text-primary dark:text-cyan-100 mb-2"
-                  >
-                    Phone (Optional)
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent dark:bg-white dark:text-gray-900"
-                    placeholder="555-123-4567"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
           {/* Time Slots */}
           <div className="bg-white dark:bg-primary rounded-xl shadow-2xl p-8">

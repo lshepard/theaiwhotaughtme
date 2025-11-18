@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import Cookies from 'js-cookie';
 import type { Story } from '@/lib/db';
 
@@ -129,6 +130,46 @@ export default function AdminPage() {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
+  };
+
+  const handleDelete = async (storyId: number) => {
+    if (!confirm('Are you sure you want to delete this story? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const authCookie = Cookies.get('admin_auth');
+      if (!authCookie) {
+        setError('Not authenticated');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      const response = await fetch(`/api/admin/stories/${storyId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Basic ${authCookie}`,
+        },
+      });
+
+      if (response.status === 401) {
+        setError('Session expired. Please login again.');
+        Cookies.remove('admin_auth');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to delete story');
+      }
+
+      // Remove the story from the local state
+      setStories(stories.filter(story => story.id !== storyId));
+    } catch (err) {
+      console.error('Error deleting story:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete story');
+    }
   };
 
   if (!isAuthenticated) {
@@ -308,6 +349,26 @@ export default function AdminPage() {
                       </a>
                     </div>
                   )}
+                  <div className="pt-2 flex gap-3">
+                    <Link
+                      href={`/schedule?id=${story.id}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Schedule Interview
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(story.id)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
