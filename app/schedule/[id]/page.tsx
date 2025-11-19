@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 
@@ -11,8 +11,10 @@ interface TimeSlot {
   invitees_remaining: number;
 }
 
-function SchedulePageContent() {
-  const searchParams = useSearchParams();
+export default function SchedulePage() {
+  const params = useParams();
+  const storyId = params.id as string;
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -22,59 +24,49 @@ function SchedulePageContent() {
   const [aiUsage, setAiUsage] = useState('');
   const [isLoadingStory, setIsLoadingStory] = useState(false);
 
-  // Fetch story data if id is provided
+  // Fetch story data
   useEffect(() => {
-    const id = searchParams?.get('id');
-    if (id) {
-      setIsLoadingStory(true);
-      const fetchStory = async () => {
-        try {
-          const response = await fetch(`/api/stories/${id}`);
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Fetched story data:', data);
-            if (data.success && data.story) {
-              const story = data.story;
-              console.log('Setting form fields:', {
-                name: story.name,
-                email: story.email,
-                phone: story.phone,
-                school: story.school,
-                role: story.role,
-                grades: story.grades,
-                aiUsage: story.story
-              });
-              setName(story.name || '');
-              setEmail(story.email || '');
-              setPhone(story.phone || '');
-              setSchool(story.school || '');
-              setRole(story.role || '');
-              setGrades(story.grades || '');
-              setAiUsage(story.story || '');
-            } else {
-              console.error('Invalid response structure:', data);
-            }
+    if (!storyId) return;
+
+    setIsLoadingStory(true);
+    const fetchStory = async () => {
+      try {
+        const response = await fetch(`/api/stories/${storyId}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched story data:', data);
+          if (data.success && data.story) {
+            const story = data.story;
+            console.log('Setting form fields:', {
+              name: story.name,
+              email: story.email,
+              phone: story.phone,
+              school: story.school,
+              role: story.role,
+              grades: story.grades,
+              aiUsage: story.story
+            });
+            setName(story.name || '');
+            setEmail(story.email || '');
+            setPhone(story.phone || '');
+            setSchool(story.school || '');
+            setRole(story.role || '');
+            setGrades(story.grades || '');
+            setAiUsage(story.story || '');
           } else {
-            console.error('Failed to fetch story:', response.status, await response.text());
+            console.error('Invalid response structure:', data);
           }
-        } catch (error) {
-          console.error('Error fetching story:', error);
-        } finally {
-          setIsLoadingStory(false);
+        } else {
+          console.error('Failed to fetch story:', response.status, await response.text());
         }
-      };
-      fetchStory();
-    } else if (searchParams) {
-      // Fallback to query params if no id
-      setName(searchParams.get('name') || '');
-      setEmail(searchParams.get('email') || '');
-      setPhone(searchParams.get('phone') || '');
-      setSchool(searchParams.get('school') || '');
-      setRole(searchParams.get('role') || '');
-      setGrades(searchParams.get('grades') || '');
-      setAiUsage(searchParams.get('aiUsage') || '');
-    }
-  }, [searchParams]);
+      } catch (error) {
+        console.error('Error fetching story:', error);
+      } finally {
+        setIsLoadingStory(false);
+      }
+    };
+    fetchStory();
+  }, [storyId]);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -129,7 +121,6 @@ function SchedulePageContent() {
     setError('');
 
     try {
-      const storyId = searchParams?.get('id');
       const response = await fetch('/api/cal/book', {
         method: 'POST',
         headers: {
@@ -536,21 +527,6 @@ function SchedulePageContent() {
         </div>
       </section>
     </div>
-  );
-}
-
-export default function SchedulePage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white dark:bg-[#0d1f26]">
-        <Navigation />
-        <div className="flex items-center justify-center min-h-screen">
-          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
-    }>
-      <SchedulePageContent />
-    </Suspense>
   );
 }
 
