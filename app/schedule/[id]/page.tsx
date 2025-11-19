@@ -74,6 +74,13 @@ export default function SchedulePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [userTimezone, setUserTimezone] = useState('');
+
+  // Detect user's timezone
+  useEffect(() => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setUserTimezone(timezone);
+  }, []);
 
   // Fetch available slots on mount
   useEffect(() => {
@@ -322,9 +329,19 @@ export default function SchedulePage() {
             <h1 className="text-3xl md:text-4xl font-bold text-primary dark:text-cyan-100 mb-3">
               Schedule Your Interview
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
               Choose a time that works best for you
             </p>
+            {userTimezone && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">
+                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-blue-900 dark:text-blue-100 font-medium">
+                  Times shown in your timezone: {userTimezone.replace(/_/g, ' ')}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Contact Info Form - Always visible, pre-filled if data provided */}
