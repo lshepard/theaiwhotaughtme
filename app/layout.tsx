@@ -19,10 +19,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <PostHogProvider>
-          {children}
-        </PostHogProvider>
-
         {/* Meta Pixel Code */}
         <Script
           id="facebook-pixel"
@@ -50,6 +46,10 @@ export default function RootLayout({
             src="https://www.facebook.com/tr?id=4100580976862344&ev=PageView&noscript=1"
           />
         </noscript>
+
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );
