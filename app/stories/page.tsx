@@ -81,13 +81,6 @@ export default function SubmitStoryPage() {
     loadGrades();
   }, []);
 
-  // Track Facebook Pixel ViewContent event when page loads
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'ViewContent');
-    }
-  }, []);
-
   const handleStep1Next = async () => {
     setError('');
 
