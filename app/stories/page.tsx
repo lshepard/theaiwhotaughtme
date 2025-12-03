@@ -5,6 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navigation from '@/components/Navigation';
 
+// Declare fbq for TypeScript
+declare global {
+  interface Window {
+    fbq: any;
+  }
+}
+
 interface SchoolSuggestion {
   name: string;
   fullAddress: string;
@@ -74,6 +81,13 @@ export default function SubmitStoryPage() {
     loadGrades();
   }, []);
 
+  // Track Facebook Pixel ViewContent event when page loads
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'ViewContent');
+    }
+  }, []);
+
   const handleStep1Next = async () => {
     setError('');
 
@@ -134,6 +148,12 @@ export default function SubmitStoryPage() {
 
       const responseData = await response.json();
       setSubmittedStoryId(responseData.id || null);
+
+      // Track Facebook Pixel Contact event
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Contact');
+      }
+
       setSubmitSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Failed to submit your story. Please try again.');
