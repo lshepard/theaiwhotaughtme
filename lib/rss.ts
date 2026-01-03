@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { Episode } from '@/types/episode';
+import { generateSlug } from './slug';
 
 export const PODBEAN_RSS_URL = 'https://theaiwhotaughtme.podbean.com/feed.xml';
 
@@ -42,15 +43,29 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       // Handle iTunes duration
       const duration = item['itunes:duration'] || '';
 
+      // Extract slug from Podbean link (e.g., /e/9-the-story-of-amira-ello...)
+      const title = item.title || 'Untitled Episode';
+      const link = item.link || '';
+      const slugMatch = link.match(/\/e\/(.+)$/);
+      const slug = slugMatch ? slugMatch[1].replace(/\/$/, '') : generateSlug(title);
+
+      // Extract platform links if available
+      const description = item.description || item['itunes:summary'] || '';
+      const spotifyMatch = description.match(/https?:\/\/open\.spotify\.com\/episode\/[a-zA-Z0-9]+/);
+      const appleMatch = description.match(/https?:\/\/podcasts\.apple\.com\/[^"\s]+/);
+
       return {
-        title: item.title || 'Untitled Episode',
-        description: item.description || item['itunes:summary'] || '',
+        title,
+        description,
         audioUrl,
         pubDate: item.pubDate || '',
         duration,
         imageUrl,
-        link: item.link || '',
+        link,
         guid: item.guid?.['#text'] || item.guid || '',
+        slug,
+        spotifyUrl: spotifyMatch?.[0],
+        applePodcastsUrl: appleMatch?.[0],
       };
     });
 

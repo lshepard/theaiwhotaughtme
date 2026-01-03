@@ -7,4 +7,7 @@ export interface Episode {
   imageUrl?: string;
   link?: string;
   guid?: string;
+  slug: string;
+  spotifyUrl?: string;
+  applePodcastsUrl?: string;
 }

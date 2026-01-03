@@ -2,6 +2,7 @@
 
 import { Episode } from '@/types/episode';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface EpisodeCardProps {
@@ -76,21 +77,26 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
         <div className="flex gap-4">
           {/* Episode artwork */}
           {episode.imageUrl && (
-            <div className="flex-shrink-0">
+            <Link href={`/e/${episode.slug}`} className="flex-shrink-0">
               <Image
                 src={episode.imageUrl}
                 alt={episode.title}
                 width={120}
                 height={120}
-                className="rounded-lg ring-2 ring-cyan-500/20"
+                className="rounded-lg ring-2 ring-cyan-500/20 hover:ring-cyan-500/40 transition-all cursor-pointer"
               />
-            </div>
+            </Link>
           )}
 
           {/* Episode info */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-semibold mb-2 text-primary dark:text-cyan-100">
-              {episode.title}
+            <h3 className="text-xl font-semibold mb-2">
+              <Link
+                href={`/e/${episode.slug}`}
+                className="text-primary dark:text-cyan-100 hover:text-teal-700 dark:hover:text-cyan-300 transition-colors"
+              >
+                {episode.title}
+              </Link>
             </h3>
             <p className="text-sm text-teal-600 dark:text-cyan-400 mb-3">
               {formatDate(episode.pubDate)}
